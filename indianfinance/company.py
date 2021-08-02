@@ -2,7 +2,7 @@ import json
 import requests
 import os
 from zipfile import ZipFile
-
+from datetime import datetime
 from .utilities import create_dir, autocomplete
 
 
@@ -14,10 +14,10 @@ class company:
         company_symbols_list = company_symbols.split()
         self.company_symbols_list = company_symbols_list
         self.headers = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:80.0) Gecko/20100101 Firefox/80.0'}
-        self.url_host = 'https://www.nseindia.com/'
+        self.url_host = "https://www.nseindia.com/"
         self.url_api_marketinfo = "https://www.nseindia.com/api/quote-equity?symbol="
-        self.url_api_annualreport = 'https://www.nseindia.com/api/annual-reports?index=equities&symbol='
-        
+        self.url_api_annualreport = "https://www.nseindia.com/api/annual-reports?index=equities&symbol="
+        self.url_api_historical = "https://www.nseindia.com/api/historical/cm/equity?symbol={}&series=[%22EQ%22]&from={}&to={}"
         
         with requests.session() as s:
             
@@ -52,7 +52,31 @@ class company:
                 companyinfo[company_symbol]["LastPrice"] = json_data["priceInfo"]["lastPrice"]
                 companyinfo[company_symbol]["MCap"] = json_data["securityInfo"]["issuedCap"] * json_data["priceInfo"]["lastPrice"] / 1e12
         
-        return json.dumps(companyinfo)        
+        return json.dumps(companyinfo) 
+    
+    
+    def historical_data(self, from_date, to_date):
+        
+        historical_info = {} 
+        from_date =  datetime.strptime(from_date,"%d%m%Y").strftime("%d-%m-%Y")
+        to_date =  datetime.strptime(to_date,"%d%m%Y").strftime("%d-%m-%Y")
+        
+        with requests.session() as s:
+            
+            # load cookies:
+            s.get(self.url_host, headers = self.headers)
+            
+            for company_symbol in self.company_symbols_list:
+                historical_info[company_symbol] = {"Date":[], "Open":[], "Close":[], "High":[], "Low":[]}
+                json_data = s.get(self.url_api_historical.format(company_symbol, from_date, to_date), headers = self.headers).json()
+                for dictionary in json_data["data"]:
+                    historical_info[company_symbol]["Date"].append(dictionary["CH_TIMESTAMP"])
+                    historical_info[company_symbol]["Open"].append(dictionary["CH_OPENING_PRICE"])
+                    historical_info[company_symbol]["Close"].append(dictionary["CH_CLOSING_PRICE"])
+                    historical_info[company_symbol]["High"].append(dictionary["CH_TRADE_HIGH_PRICE"])
+                    historical_info[company_symbol]["Low"].append(dictionary["CH_TRADE_LOW_PRICE"])
+                    
+        return json.dumps(historical_info)        
                     
     def annual_report(self, years):
         
