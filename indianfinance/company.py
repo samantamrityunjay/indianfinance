@@ -35,7 +35,7 @@ class company:
                     autocomplete(company_symbol)
                     raise ValueError
      
-    def marketinfo(self):
+    def market_info(self):
         companyinfo = {} 
          
         with requests.session() as s:

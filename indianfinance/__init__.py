@@ -1,1 +1,1 @@
-from .annual_report import company
+from .company import company
