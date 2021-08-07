@@ -95,4 +95,4 @@ ValueError
 ```
 
 ## Acknowlegements
-The following package has been oly possible due to the APIs of [NSE](https://www.nseindia.com/)
+The following package has been only possible due to the APIs of [NSE](https://www.nseindia.com/)

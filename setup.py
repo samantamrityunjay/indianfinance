@@ -27,10 +27,10 @@ setup(
         classifiers= [
             "Development Status :: 3 - Alpha",
             "Intended Audience :: Education",
-            "Intended Audience :: Financial",
-            "Programming Language :: Python :: 3"
+            # "Intended Audience :: Financial",
+            "Programming Language :: Python :: 3",
             "Operating System :: MacOS",
             "Operating System :: Microsoft :: Windows",
-            "Operating System :: Ubuntu",
+            "Operating System :: Unix",
         ]
 )
