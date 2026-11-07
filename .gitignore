@@ -27,10 +27,6 @@ htmlcov/
 .env
 .env.*
 
-# Old 0.0.x leftovers (removed in T-002)
-AnnualReport
-try.py
-
 # Editors / OS
 .vscode/
 .idea/
