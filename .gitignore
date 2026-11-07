@@ -1,2 +1,38 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+
+# Build and packaging output
+/build/
+/dist/
+*.egg-info/
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+
+# Tool caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Docs site build output (zensical build)
+/site/
+
+# Local secrets
+.env
+.env.*
+
+# Old 0.0.x leftovers (removed in T-002)
 AnnualReport
 try.py
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
