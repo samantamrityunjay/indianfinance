@@ -33,6 +33,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added internal date helpers for the AMFI and NSE file formats (`07-Nov-2026`,
   `2026-11-07`, `20261107`). Month names use a fixed English table, so parsing does not
   depend on the computer's language settings. Bad dates raise `SourceFormatError`.
+- Added internal HTTP helpers used by every download: 10 s connect / 30 s read timeouts,
+  up to 3 retries with exponential backoff for timeouts, connection errors and HTTP 429 /
+  5xx, `User-Agent: indianfinance/<version>` (browser-like for NSE), and downloads only
+  from the official AMFI, NSE and NPS Trust hosts. Failures raise `SourceUnavailable`.
+- Added an "HTTP" section to the Design docs page: timeouts, retries, User-Agent and
+  passing your own `httpx.Client`.
 
 ### Changed
 

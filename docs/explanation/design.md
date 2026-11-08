@@ -68,6 +68,45 @@ Cashflow(date=datetime.date(2026, 1, 5), amount=Decimal('-6000'))
 - Three models have a field named `date`, so the examples use `import datetime as dt`
   and write `dt.date(...)`.
 
+## HTTP
+
+- Downloads use `https://` only, from the official AMFI, NSE and NPS Trust hosts
+  (`amfiindia.com`, `www.amfiindia.com`, `portal.amfiindia.com`, `nseindia.com`,
+  `www.nseindia.com`, `nsearchives.nseindia.com`, `npstrust.org.in`,
+  `www.npstrust.org.in`). A redirect to any other host is refused.
+- Timeouts: 10 s to connect, 30 s to read.
+- Retries: timeouts, connection errors and HTTP 429, 500, 502, 503 and 504 are retried
+  up to 3 times, after 1 s, 2 s and 4 s. A `Retry-After` header in whole seconds is
+  honoured up to 30 s. A longer `Retry-After` stops retrying at once with
+  `SourceUnavailable`.
+- Other errors, for example HTTP 403 and 404, fail at once.
+- A failure raises `SourceUnavailable` with `url` and `status_code`.
+- The `User-Agent` is `indianfinance/<version>`. NSE hosts get a browser-like one,
+  because NSE blocks bot-like clients.
+
+### Your own client
+
+Data functions (from M4 on) take `client: httpx.Client | None = None`.
+
+- Your client's timeout, headers, proxies and transport are used as they are.
+- Your `User-Agent` is kept. NSE may then refuse the request.
+- The library never closes your client.
+- Retries and the allowed-host check still apply.
+
+```python
+import httpx
+
+with httpx.Client(
+    timeout=httpx.Timeout(60.0, connect=10.0),
+    headers={"User-Agent": "myapp/1.0 (me@example.com)"},
+) as client:
+    print(client.timeout)
+```
+
+```text
+Timeout(connect=10.0, read=60.0, write=60.0, pool=60.0)
+```
+
 ## Errors
 
 The library raises typed exceptions, all subclasses of `IndianFinanceError`. See
