@@ -30,6 +30,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   NAVs and amounts are `Decimal`; dates are `datetime.date`.
 - Added docs: "Models" page in the API reference and a "Frozen dataclasses" section on
   the Design page.
+- Added internal date helpers for the AMFI and NSE file formats (`07-Nov-2026`,
+  `2026-11-07`, `20261107`). Month names use a fixed English table, so parsing does not
+  depend on the computer's language settings. Bad dates raise `SourceFormatError`.
 
 ### Changed
 
