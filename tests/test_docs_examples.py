@@ -147,7 +147,9 @@ def run_docstring_examples(module: types.ModuleType) -> int:
     report: list[str] = []
     attempted = 0
     for test in finder.find(module):
-        attempted += runner.run(test, out=report.append).attempted
+        results = runner.run(test, out=report.append)
+        # Python 3.13+ counts +SKIP examples in `attempted`; 3.12 does not.
+        attempted += results.attempted - getattr(results, "skipped", 0)
     if runner.failures:
         pytest.fail("\n".join(report), pytrace=False)
     return attempted
