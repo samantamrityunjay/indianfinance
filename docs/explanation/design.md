@@ -34,10 +34,39 @@ True
 
 The one exception is XIRR, which is solved numerically and returns a `float`.
 
+## Frozen dataclasses
+
+Results are frozen, slotted dataclasses (see [Models](../reference/models.md)).
+
+- You cannot change them. Use `dataclasses.replace()` to get a changed copy.
+- They compare by value and can be set members or dict keys.
+- They have no ordering. Sort with `key=`, for example `key=lambda r: r.date`.
+- Slots keep memory use small for files with thousands of rows.
+
+```python
+import dataclasses
+import datetime as dt
+from decimal import Decimal
+
+from indianfinance.models import Cashflow
+
+paid = Cashflow(dt.date(2026, 1, 5), Decimal("-5000"))
+bigger = dataclasses.replace(paid, amount=Decimal("-6000"))
+print(paid)
+print(bigger)
+```
+
+```text
+Cashflow(date=datetime.date(2026, 1, 5), amount=Decimal('-5000'))
+Cashflow(date=datetime.date(2026, 1, 5), amount=Decimal('-6000'))
+```
+
 ## Dates
 
 - Every record carries the date the source gives. The library never guesses "today".
 - Date ranges are inclusive: both `start` and `end` are included.
+- Three models have a field named `date`, so the examples use `import datetime as dt`
+  and write `dt.date(...)`.
 
 ## Errors
 

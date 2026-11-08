@@ -25,6 +25,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   typed attributes (`day`, `line`, `url`, `status_code`, `symbol`).
 - Added docs pages: "Exceptions" in the API reference and "Design" (stateless, end-of-day
   data from official sources, `Decimal` for money).
+- Added `indianfinance.models`: frozen, slotted dataclasses `NavRecord`, `Scheme`,
+  `EodPrice` and `Cashflow`, and the `PricePoint` protocol (`.date`, `.value`). Prices,
+  NAVs and amounts are `Decimal`; dates are `datetime.date`.
+- Added docs: "Models" page in the API reference and a "Frozen dataclasses" section on
+  the Design page.
 
 ### Changed
 
