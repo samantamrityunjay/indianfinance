@@ -45,6 +45,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   counts years as days / 365. Bad arguments raise `ValueError` or `TypeError`.
 - Added docs: "Returns" API reference page and the how-to guide "Absolute return and
   CAGR".
+- Added `indianfinance.returns.xirr()`: the yearly rate of return of dated `Cashflow`
+  amounts, like spreadsheet `XIRR` (days / 365). Returns a `float` fraction
+  (`0.12` = 12 %). Bad input or no solution raises `ValueError` or `TypeError`.
+- Added docs: `xirr()` on the "Returns" reference page and the how-to guide "XIRR for
+  a SIP".
 
 ### Changed
 
