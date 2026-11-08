@@ -39,6 +39,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   from the official AMFI, NSE and NPS Trust hosts. Failures raise `SourceUnavailable`.
 - Added an "HTTP" section to the Design docs page: timeouts, retries, User-Agent and
   passing your own `httpx.Client`.
+- Added `indianfinance.returns.absolute_return()` and `indianfinance.returns.cagr()`.
+  Both return `Decimal` fractions (`0.125` = 12.5 %) with 28 significant digits.
+  `cagr()` takes `(date, Decimal)` tuples or `NavRecord` / `EodPrice` objects and
+  counts years as days / 365. Bad arguments raise `ValueError` or `TypeError`.
+- Added docs: "Returns" API reference page and the how-to guide "Absolute return and
+  CAGR".
 
 ### Changed
 
