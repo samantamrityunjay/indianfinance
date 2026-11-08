@@ -1,0 +1,96 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "indianfinance"
+version = "0.1.0.dev0"
+description = "Indian market end-of-day (EOD) data from official sources (AMFI, NSE)."
+readme = "README.md"
+requires-python = ">=3.12"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Mrityunjay Samanta", email = "samantamrityunjay98@gmail.com" }]
+keywords = ["india", "finance", "eod", "nav", "mutual-funds", "amfi", "nse", "bhavcopy"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Financial and Insurance Industry",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Office/Business :: Financial :: Investment",
+    "Typing :: Typed",
+]
+dependencies = ["httpx>=0.28"]
+
+[project.optional-dependencies]
+pandas = ["pandas>=2.2"]
+
+[project.urls]
+Homepage = "https://github.com/samantamrityunjay/indianfinance"
+Source = "https://github.com/samantamrityunjay/indianfinance"
+Issues = "https://github.com/samantamrityunjay/indianfinance/issues"
+Changelog = "https://github.com/samantamrityunjay/indianfinance/blob/main/CHANGELOG.md"
+
+[dependency-groups]
+dev = [
+    "mypy>=1.17",
+    "pytest>=8.4",
+    "ruff>=0.12",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/indianfinance"]
+
+[tool.hatch.build.targets.sdist]
+only-include = ["src/indianfinance", "tests", "CHANGELOG.md", "LICENSE", "README.md"]
+
+[tool.ruff]
+line-length = 88
+src = ["src", "tests"]
+
+[tool.ruff.format]
+docstring-code-format = true
+line-ending = "lf"
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "B",    # flake8-bugbear
+    "UP",   # pyupgrade
+    "SIM",  # flake8-simplify
+    "C4",   # flake8-comprehensions
+    "N",    # pep8-naming
+    "PT",   # flake8-pytest-style
+    "RUF",  # ruff-specific
+    "T20",  # no print() (rule 7)
+    "DTZ",  # no naive datetime / date.today() (D-003)
+    "D",    # docstrings (D-009)
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["D"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_unreachable = true
+files = ["src"]
+
+[tool.pytest.ini_options]
+minversion = "8.4"
+testpaths = ["tests"]
+addopts = ["-m", "not live", "--strict-markers", "--strict-config", "--import-mode=importlib", "-ra"]
+markers = [
+    "live: hits a real official source over the network; excluded by default, run with `pytest -m live`",
+]
+xfail_strict = true
+filterwarnings = ["error"]

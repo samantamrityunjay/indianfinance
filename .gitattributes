@@ -1,0 +1,12 @@
+# Store and check out all text files with LF line endings.
+* text=auto eol=lf
+
+# Real source files used as test fixtures: keep them byte for byte.
+tests/fixtures/** -text
+
+# Binary files
+*.zip binary
+*.whl binary
+*.gz binary
+*.png binary
+*.ico binary

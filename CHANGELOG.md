@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added `indianfinance.__version__`, read from the installed package metadata.
+- Added type hints for users: the package ships a `py.typed` marker (PEP 561).
+- Added the `[pandas]` extra (`pip install "indianfinance[pandas]"`). The pandas helpers
+  that use it arrive later in 0.1.0.
+
+### Changed
+
+- **Breaking:** requires Python 3.12 or newer (0.0.x allowed 3.5+).
+- Changed the only runtime dependency from `requests` to `httpx`.
+- Changed packaging to `pyproject.toml` with the hatchling build backend and a `src/`
+  layout. The package is now released under the MIT license.
+
 ### Removed
 
 - **Breaking:** removed the 0.0.x API: the `indianfinance.company` class with its
@@ -16,3 +30,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   whole-market files.
 - Removed build artifacts (`build/`, `dist/`, `indianfinance.egg-info/`, `__pycache__/`)
   from the git repository. They are generated files and were never source.
+- Removed `setup.py` (replaced by `pyproject.toml`).
