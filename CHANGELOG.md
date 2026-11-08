@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   pages. Build it locally with `uv run zensical build`.
 - Added tests that run every Python example in the docs pages and docstrings, so the
   examples stay correct.
+- Added continuous integration (GitHub Actions): every push and pull request runs the
+  linters, type checks, tests and docs build on Linux with Python 3.12 to 3.15, and
+  checks the built package.
 
 ### Changed
 
@@ -24,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Changed the only runtime dependency from `requests` to `httpx`.
 - Changed packaging to `pyproject.toml` with the hatchling build backend and a `src/`
   layout. The package is now released under the MIT license.
+- Changed the package metadata to list Python 3.12, 3.13, 3.14 and 3.15 as supported.
 
 ### Removed
 
