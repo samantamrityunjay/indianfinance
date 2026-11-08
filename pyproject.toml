@@ -36,9 +36,11 @@ Changelog = "https://github.com/samantamrityunjay/indianfinance/blob/main/CHANGE
 
 [dependency-groups]
 dev = [
+    "mkdocstrings-python>=2.0",
     "mypy>=1.17",
     "pytest>=8.4",
     "ruff>=0.12",
+    "zensical>=0.0.38",
 ]
 
 [tool.hatch.build.targets.wheel]

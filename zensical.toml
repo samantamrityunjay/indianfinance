@@ -1,0 +1,73 @@
+# Docs site config. Build: `uv run zensical build --strict`. Preview: `uv run zensical serve`.
+
+[project]
+site_name = "indianfinance"
+site_description = "Indian market end-of-day (EOD) data from official sources (AMFI, NSE)."
+site_author = "Mrityunjay Samanta"
+# site_url: not set until the deploy target is chosen (M8, owner decision 2026-11-08)
+repo_url = "https://github.com/samantamrityunjay/indianfinance"
+repo_name = "samantamrityunjay/indianfinance"
+copyright = "Copyright &copy; 2026 Mrityunjay Samanta. MIT License."
+docs_dir = "docs"
+site_dir = "site"
+# Files outside docs_dir that pages include; rebuild on change in `zensical serve`.
+watch = ["CHANGELOG.md", "src/indianfinance"]
+nav = [
+  { "Home" = "index.md" },
+  { "Install" = "install.md" },
+  { "API reference" = "reference/index.md" },
+  { "Changelog" = "changelog.md" },
+]
+
+[project.theme]
+language = "en"
+features = [
+  "content.code.copy",
+  "navigation.footer",
+  "navigation.top",
+  "search.highlight",
+]
+
+# Light / dark toggle. The first visit follows the OS setting.
+[[project.theme.palette]]
+media = "(prefers-color-scheme: light)"
+scheme = "default"
+toggle.icon = "lucide/sun"
+toggle.name = "Switch to dark mode"
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme: dark)"
+scheme = "slate"
+toggle.icon = "lucide/moon"
+toggle.name = "Switch to light mode"
+
+# All extensions are listed explicitly (see Open question 1).
+[project.markdown_extensions]
+admonition = {}
+attr_list = {}
+md_in_html = {}
+toc.permalink = true
+pymdownx.details = {}
+pymdownx.highlight.anchor_linenums = true
+pymdownx.highlight.line_spans = "__span"
+pymdownx.highlight.pygments_lang_class = true
+pymdownx.inlinehilite = {}
+# Paths are relative to the repo root (where zensical runs). Missing file = build error.
+pymdownx.snippets.base_path = ["."]
+pymdownx.snippets.check_paths = true
+pymdownx.superfences.custom_fences = [
+  { name = "mermaid", class = "mermaid", format = "pymdownx.superfences.fence_code_format" },
+]
+pymdownx.tabbed.alternate_style = true
+
+# API reference from Google-style docstrings (D-009). Static analysis, no import.
+[project.plugins.mkdocstrings.handlers.python]
+paths = ["src"]
+
+[project.plugins.mkdocstrings.handlers.python.options]
+docstring_style = "google"
+docstring_section_style = "list"
+members_order = "source"
+show_root_heading = true
+show_source = false
+show_signature_annotations = true

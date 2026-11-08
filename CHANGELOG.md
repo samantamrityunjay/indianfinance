@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added type hints for users: the package ships a `py.typed` marker (PEP 561).
 - Added the `[pandas]` extra (`pip install "indianfinance[pandas]"`). The pandas helpers
   that use it arrive later in 0.1.0.
+- Added a documentation site (Zensical): Home, Install, API reference and Changelog
+  pages. Build it locally with `uv run zensical build`.
 
 ### Changed
 
