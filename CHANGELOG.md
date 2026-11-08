@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   that use it arrive later in 0.1.0.
 - Added a documentation site (Zensical): Home, Install, API reference and Changelog
   pages. Build it locally with `uv run zensical build`.
+- Added tests that run every Python example in the docs pages and docstrings, so the
+  examples stay correct.
 
 ### Changed
 
