@@ -20,6 +20,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added continuous integration (GitHub Actions): every push and pull request runs the
   linters, type checks, tests and docs build on Linux with Python 3.12 to 3.15, and
   checks the built package.
+- Added `indianfinance.exceptions`: `IndianFinanceError` and its subclasses
+  `NoDataForDate`, `SourceFormatError`, `SourceUnavailable` and `SymbolNotFound`, with
+  typed attributes (`day`, `line`, `url`, `status_code`, `symbol`).
+- Added docs pages: "Exceptions" in the API reference and "Design" (stateless, end-of-day
+  data from official sources, `Decimal` for money).
 
 ### Changed
 

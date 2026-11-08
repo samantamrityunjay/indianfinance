@@ -15,7 +15,13 @@ watch = ["CHANGELOG.md", "src/indianfinance"]
 nav = [
   { "Home" = "index.md" },
   { "Install" = "install.md" },
-  { "API reference" = "reference/index.md" },
+  { "API reference" = [
+    { "Overview" = "reference/index.md" },
+    { "Exceptions" = "reference/exceptions.md" },
+  ] },
+  { "Explanation" = [
+    { "Design" = "explanation/design.md" },
+  ] },
   { "Changelog" = "changelog.md" },
 ]
 
@@ -71,3 +77,4 @@ members_order = "source"
 show_root_heading = true
 show_source = false
 show_signature_annotations = true
+merge_init_into_class = true

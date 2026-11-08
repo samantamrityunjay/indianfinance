@@ -32,4 +32,5 @@ flowchart LR
 
 - [Install](install.md) the package.
 - Browse the [API reference](reference/index.md).
+- Read the [design](explanation/design.md) behind the library.
 - Read the [Changelog](changelog.md).
