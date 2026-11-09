@@ -4,7 +4,7 @@ The library downloads whole-market files only, from AMFI and NSE (NPS later). Th
 lists the exact URLs, columns and quirks of each file. Checked on 2026-11-09.
 
 - AMFI: below.
-- NSE: coming in a later release.
+- NSE: [CM bhavcopy](#nse-cm-bhavcopy).
 
 For when each file is published, see [Data timing](explanation/data-timing.md).
 
@@ -116,8 +116,114 @@ Quirks:
 - Weekends return only schemes that publish NAVs every day: on Sunday 2026-11-08, 734
   rows (overnight, liquid and some ETFs).
 
+## NSE: CM bhavcopy
+
+The capital market (CM) bhavcopy is NSE's end-of-day file for every security traded on
+the day (UDiFF format).
+
+- URL: `https://nsearchives.nseindia.com/content/cm/BhavCopy_NSE_CM_0_0_0_<yyyymmdd>_F_0000.csv.zip`
+- Example for Friday 2026-11-06:
+  `https://nsearchives.nseindia.com/content/cm/BhavCopy_NSE_CM_0_0_0_20261106_F_0000.csv.zip`
+- In the file name, `F` means final (`P` is provisional) and `0000` is the time part,
+  which is `0000` for the final file (NSE file-format sheet).
+- A zip with one CSV member. The member has the same name without `.zip`.
+- Size: about 200 KB zipped (208 064 bytes on 2026-11-06), 640 KB unzipped, 3 715 rows.
+- ASCII, LF line endings (no `CR`), no quotes, no BOM. The file ends with a row and a
+  line break.
+
+Sample lines (verbatim, in file order, 6 of 3 715 rows):
+
+```text
+TradDt,BizDt,Sgmt,Src,FinInstrmTp,FinInstrmId,ISIN,TckrSymb,SctySrs,XpryDt,FininstrmActlXpryDt,StrkPric,OptnTp,FinInstrmNm,OpnPric,HghPric,LwPric,ClsPric,LastPric,PrvsClsgPric,UndrlygPric,SttlmPric,OpnIntrst,ChngInOpnIntrst,TtlTradgVol,TtlTrfVal,TtlNbOfTxsExctd,SsnId,NewBrdLotQty,Rmks,Rsvd1,Rsvd2,Rsvd3,Rsvd4
+2026-11-06,2026-11-06,CM,NSE,STK,19078,IN0020200104,SGBJUN28,GB,,,,,2.5%GOLDBONDS2028SR-III,14380.00,14380.00,14199.00,14247.52,14299.99,14421.02,,14204.04,,,214,3055333.94,87,F1,1,,,,,
+2026-11-06,2026-11-06,CM,NSE,STK,15147,INE0O6N01012,AGUL,SM,,,,,A G UNIVERSAL LIMITED,64.75,64.75,64.75,64.75,64.75,61.70,,64.75,,,2000,129500.00,1,F1,2000,,,,,
+2026-11-06,2026-11-06,CM,NSE,STK,100,INE885A01032,ARE&M,EQ,,,,,AMARA RAJA ENERGY MOB LTD,737.00,737.45,723.70,728.25,728.00,736.45,,728.27,,,316359,230677299.50,18501,F1,1,,,,,
+2026-11-06,2026-11-06,CM,NSE,STK,766492,IN002026Y279,182D080427,TB,,,,,GOI TBILL 182D-08/04/27,97.40,97.40,97.40,97.40,97.40,96.59,,97.40,,,500,48700.00,1,F1,100,,,,,
+2026-11-06,2026-11-06,CM,NSE,STK,1594,INE009A01021,INFY,EQ,,,,,INFOSYS LIMITED,1182.80,1198.80,1163.00,1181.40,1181.40,1167.40,,1181.38,,,15301109,18005126629.60,229030,F1,1,,,,,
+2026-11-06,2026-11-06,CM,NSE,STK,10576,INF204KB14I2,NIFTYBEES,EQ,,,,,NIP IND ETF NIFTY BEES,278.00,284.95,276.57,284.22,284.45,279.36,,284.21,,,20193627,5682683007.94,91621,F1,1,,,,,
+```
+
+The file has 34 columns. The 11 that `EodPrice` uses, plus the other columns that have
+data:
+
+| NSE column | NSE meaning | Old bhavcopy name | `EodPrice` field |
+|---|---|---|---|
+| `TradDt` | Trade date, `yyyy-mm-dd` | `TIMESTAMP` | `date` |
+| `BizDt` | Business date (when the session started) | - | - |
+| `Sgmt` | Segment, `CM` = cash market | - | - |
+| `Src` | Source, `NSE` | - | - |
+| `FinInstrmTp` | Instrument type, `STK` = stock | - | - |
+| `FinInstrmId` | Unique instrument id at the exchange (token number) | - | - |
+| `ISIN` | ISIN of the security | `ISIN` | `isin` |
+| `TckrSymb` | Instrument symbol | `SYMBOL` | `symbol` |
+| `SctySrs` | Instrument series | `SERIES` | `series` |
+| `FinInstrmNm` | Instrument (security) name | - | - |
+| `OpnPric` | Open | `OPEN` | `open` |
+| `HghPric` | High | `HIGH` | `high` |
+| `LwPric` | Low | `LOW` | `low` |
+| `ClsPric` | Close | `CLOSE` | `close` |
+| `LastPric` | Last traded price | `LAST` | - |
+| `PrvsClsgPric` | Previous close | `PREVCLOSE` | `prev_close` |
+| `SttlmPric` | Settlement price | - | - |
+| `TtlTradgVol` | Total traded quantity | `TOTTRDQTY` | `volume` |
+| `TtlTrfVal` | Total traded value | `TOTTRDVAL` | `traded_value` |
+| `TtlNbOfTxsExctd` | Total number of trades | `TOTALTRADES` | - |
+| `SsnId` | Session id, `F1` = final bhavcopy of session 1 | - | - |
+| `NewBrdLotQty` | Market lot size | - | - |
+
+NSE says these 12 columns are blank for the CM segment, and they are blank in every
+row: `XpryDt`, `FininstrmActlXpryDt`, `StrkPric`, `OptnTp`, `UndrlygPric`, `OpnIntrst`,
+`ChngInOpnIntrst`, `Rmks`, `Rsvd1`, `Rsvd2`, `Rsvd3`, `Rsvd4`.
+
+Quirks (2026-11-06 file):
+
+- Every row has `FinInstrmTp` = `STK` and `SsnId` = `F1`, ETFs and bonds included. Only
+  one date appears: `TradDt` = `BizDt` = `2026-11-06`.
+- 58 series. Most rows: `EQ` 2 746, `SM` 384, `BE` 201, `ST` 79, `GS` 51, `GB` 43,
+  `BZ` 33, `SG` 23.
+- **Almost all ETFs (358 of 359 `INF` rows) are series `EQ`; the other one is `MF`.**
+  Tell them apart by the ISIN prefix: `INF` is a mutual fund unit. ISIN prefixes on
+  2026-11-06: `INE` 3 224, `INF` 359, `IN0` 103, other `IN` 29.
+- The ISIN links an ETF's NSE price to its AMFI NAV. 358 of the 359 `INF` ISINs are in
+  `NAVAll.txt`. Example: `NIFTYBEES` (`INF204KB14I2`) closed at 284.22 on NSE, and the
+  AMFI NAV is 285.6510, dated 06-Nov-2026 in `NAVAll.txt` (the same day).
+- `ClsPric` is not `LastPric`. They differ in 2 773 of 3 715 rows. `EodPrice.close` is
+  `ClsPric`.
+- Prices and `TtlTrfVal` have exactly 2 decimals. `TtlTradgVol` is a whole number.
+  No row had zero volume or an empty or zero price.
+- Symbols can contain `&` and `-`: `ARE&M`, `BAJAJ-AUTO`. 19 of them on this day.
+- All ISINs match `IN` plus 10 letters or digits.
+
+No file:
+
+- A holiday (Friday 2026-10-02) and a Saturday (2026-11-07) get HTTP `404` with a
+  `text/html` page of 3 425 bytes. It is not a redirect and not an empty zip.
+- Muhurat trading on Sunday 2026-11-08 has a full file: 3 550 rows, `TradDt` =
+  `2026-11-08`, `PrvsClsgPric` is the 06-Nov close. NSE says in circular
+  NSE/CMTR/71775 that Muhurat trading is on that Sunday.
+- NSE circular NSE/CMTR/71775 (2025-12-12) lists the 2026 CM trading holidays, for
+  example Monday 2026-01-26, Friday 2026-10-02 and Tuesday 2026-11-10.
+
+NSE sources:
+
+- File nomenclature and column definitions: NSE "UDiFF trade and Bhavcopy file
+  formats" sheet, linked from
+  `https://www.nseindia.com/static/resources/forms-formats-members`.
+- Old and new column names: `https://nsearchives.nseindia.com/content/new_bhavcopy_format_readme.xlsx`.
+- Holidays: `https://nsearchives.nseindia.com/content/circulars/CMTR71775.pdf`.
+
 ## Requests
+
+AMFI:
 
 - `User-Agent: indianfinance/<version>` works on both endpoints.
 - No cookies are needed. The history endpoint sets `ASP.NET_SessionId`, but requests
   without it succeed.
+
+NSE (measured on 2026-11-09):
+
+- `nsearchives.nseindia.com` served the bhavcopy to `indianfinance/<version>` and to a
+  browser `User-Agent`. Both got the same file.
+- No cookies and no warm-up request are needed. `nsearchives` sets no cookies.
+- `www.nseindia.com` pages set the Akamai cookies `_abck` and `bm_sz`. The bhavcopy does
+  not need them.

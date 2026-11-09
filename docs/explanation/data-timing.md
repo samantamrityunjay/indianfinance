@@ -11,6 +11,19 @@ the [Data sources](../sources.md) page.
 - On Monday 2026-11-09 `NAVAll.txt` was last modified at 12:59 IST and still had
   `06-Nov-2026` (Friday) for most rows.
 
+## NSE bhavcopy
+
+- NSE publishes one final bhavcopy per trading day. Measured
+  `Last-Modified` of the file: 16:33 IST on Friday 2026-11-06, and 16:38 IST on Sunday
+  2026-11-08 (Muhurat trading). NSE does not state a publish time on the pages we read.
+- Weekends and holidays have no file: NSE answers `404`. Special sessions are the
+  exception. Muhurat trading on Sunday 2026-11-08 has a full file.
+- The 2026 holiday list is in NSE circular NSE/CMTR/71775 of 2025-12-12. The library
+  has no holiday calendar.
+- Every row has a trade date (`TradDt`). The library returns that date, never "today".
+
+Details and URLs: [Data sources](../sources.md#nse-cm-bhavcopy).
+
 ## What "latest" means
 
 `NAVAll.txt` holds one NAV per scheme: the newest one AMFI has for it. So the date

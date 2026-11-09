@@ -68,6 +68,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   what "latest" means).
 - Added trimmed real AMFI files as test fixtures, and live tests that detect changes to
   the AMFI file headers (`pytest -m live`).
+- Added docs: NSE capital market bhavcopy on the "Data sources" page (URL, file name,
+  columns, quirks, how to tell ETFs apart, holiday and weekend replies, User-Agent and
+  cookie behaviour) and on the "Data timing" page (one file per trading day, measured
+  publish time, Muhurat trading).
+- Added a trimmed real NSE bhavcopy as a test fixture, and a live test that detects
+  changes to the bhavcopy header (`pytest -m live`).
 
 ### Changed
 

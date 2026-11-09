@@ -81,15 +81,17 @@ Cashflow(date=datetime.date(2026, 1, 5), amount=Decimal('-6000'))
   `SourceUnavailable`.
 - Other errors, for example HTTP 403 and 404, fail at once.
 - A failure raises `SourceUnavailable` with `url` and `status_code`.
-- The `User-Agent` is `indianfinance/<version>`. NSE hosts get a browser-like one,
-  because NSE blocks bot-like clients.
+- The `User-Agent` is `indianfinance/<version>`. NSE hosts get a browser-like one
+  (decision D-001). This is a precaution: on 2026-11-09 `nsearchives.nseindia.com`
+  also served the bhavcopy to `indianfinance/<version>`.
 
 ### Your own client
 
 Data functions (from M4 on) take `client: httpx.Client | None = None`.
 
 - Your client's timeout, headers, proxies and transport are used as they are.
-- Your `User-Agent` is kept. NSE may then refuse the request.
+- Your `User-Agent` is kept. On 2026-11-09 NSE also accepted a
+  non-browser `User-Agent`, but this may change.
 - The library never closes your client.
 - Retries and the allowed-host check still apply.
 
