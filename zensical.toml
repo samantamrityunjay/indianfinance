@@ -18,6 +18,7 @@ nav = [
   { "How-to guides" = [
     { "Absolute return and CAGR" = "how-to/absolute-return-and-cagr.md" },
     { "XIRR for a SIP" = "how-to/xirr-for-a-sip.md" },
+    { "Rolling returns" = "how-to/rolling-returns.md" },
   ] },
   { "API reference" = [
     { "Overview" = "reference/index.md" },

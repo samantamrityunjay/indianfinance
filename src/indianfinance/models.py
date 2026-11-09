@@ -11,7 +11,7 @@ from dataclasses import dataclass
 from decimal import Decimal
 from typing import Protocol
 
-__all__ = ["Cashflow", "EodPrice", "NavRecord", "PricePoint", "Scheme"]
+__all__ = ["Cashflow", "EodPrice", "NavRecord", "PricePoint", "RollingReturn", "Scheme"]
 
 
 class PricePoint(Protocol):
@@ -159,3 +159,25 @@ class Cashflow:
 
     date: dt.date
     amount: Decimal
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class RollingReturn:
+    """The CAGR over one rolling window, from `returns.rolling_returns()`.
+
+    Attributes:
+        start: Date of the point used as the window start. It is on or before the
+            day `years` before `end`; it is earlier when the series has no point on
+            that day (weekend, holiday, gap).
+        end: Date of the point that ends the window.
+        start_value: The series value on `start`.
+        end_value: The series value on `end`.
+        cagr: Compound annual growth rate from `start` to `end`, a `Decimal`
+            fraction (`0.1` = 10 % a year), days / 365, not rounded.
+    """
+
+    start: dt.date
+    end: dt.date
+    start_value: Decimal
+    end_value: Decimal
+    cagr: Decimal

@@ -50,6 +50,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (`0.12` = 12 %). Bad input or no solution raises `ValueError` or `TypeError`.
 - Added docs: `xirr()` on the "Returns" reference page and the how-to guide "XIRR for
   a SIP".
+- Added `indianfinance.returns.rolling_returns()` and the `RollingReturn` model: the
+  CAGR over every `years`-long window that ends on a point of a NAV or price series.
+  A window starts on the same day `years` earlier, or the latest point before it.
+  Takes the same inputs as `cagr()`; returns an empty list for a series shorter than
+  the window.
+- Added docs: `rolling_returns()` on the "Returns" page, `RollingReturn` on the
+  "Models" page, and the how-to guide "Rolling returns".
 
 ### Changed
 

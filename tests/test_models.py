@@ -15,7 +15,14 @@ import pytest
 
 import indianfinance
 import indianfinance.models as models
-from indianfinance.models import Cashflow, EodPrice, NavRecord, PricePoint, Scheme
+from indianfinance.models import (
+    Cashflow,
+    EodPrice,
+    NavRecord,
+    PricePoint,
+    RollingReturn,
+    Scheme,
+)
 
 _DAY = dt.date(2026, 11, 6)
 _EARLIER = dt.date(2026, 11, 4)
@@ -54,6 +61,8 @@ _EOD: dict[str, Any] = {
     "traded_value": Decimal("1864000000.50"),
 }
 _CASH: dict[str, Any] = {"date": _DAY, "amount": Decimal("-5000")}
+_ROLL: dict[str, Any] = {"start": _EARLIER, "end": _DAY, "start_value": Decimal("100")}
+_ROLL |= {"end_value": Decimal("110"), "cagr": Decimal("0.1")}
 
 # (class, constructor kwargs, one changed field)
 _CASES: list[tuple[type[Any], dict[str, Any], dict[str, Any]]] = [
@@ -61,6 +70,7 @@ _CASES: list[tuple[type[Any], dict[str, Any], dict[str, Any]]] = [
     (Scheme, _SCHEME, {"amc": "Other Mutual Fund"}),
     (EodPrice, _EOD, {"volume": 1}),
     (Cashflow, _CASH, {"amount": Decimal("1")}),
+    (RollingReturn, _ROLL, {"cagr": Decimal("1")}),
 ]
 _IDS = [case[0].__name__ for case in _CASES]
 _each_model = pytest.mark.parametrize(("cls", "kw", "change"), _CASES, ids=_IDS)
@@ -121,7 +131,9 @@ def test_model_has_slots_not_dict(
     assert list(cls.__slots__) == list(kw)
 
 
-@pytest.mark.parametrize(("cls", "kw"), [c[:2] for c in _CASES[:3]], ids=_IDS[:3])
+@pytest.mark.parametrize(
+    ("cls", "kw"), [c[:2] for c in _CASES[:3] + _CASES[4:]], ids=_IDS[:3] + _IDS[4:]
+)
 def test_source_models_reject_positional_args(
     cls: type[Any], kw: dict[str, Any]
 ) -> None:
@@ -280,6 +292,7 @@ def test_models_module_public_names() -> None:
         "EodPrice",
         "NavRecord",
         "PricePoint",
+        "RollingReturn",
         "Scheme",
     ]
     assert indianfinance.__all__ == ["__version__"]

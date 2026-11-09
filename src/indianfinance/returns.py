@@ -1,4 +1,4 @@
-"""Return calculations: absolute return, CAGR and XIRR.
+"""Return calculations: absolute return, CAGR, rolling returns and XIRR.
 
 Results are ``Decimal`` fractions (``0.125`` means 12.5 %), computed with 28
 significant digits and not rounded. Round them yourself for display. ``xirr()`` is
@@ -7,6 +7,7 @@ solved numerically and returns a ``float`` fraction.
 
 from __future__ import annotations
 
+import bisect
 import datetime as dt
 import decimal
 import math
@@ -14,9 +15,9 @@ from collections.abc import Iterable
 from decimal import Decimal
 from typing import Final
 
-from indianfinance.models import Cashflow, PricePoint
+from indianfinance.models import Cashflow, PricePoint, RollingReturn
 
-__all__ = ["DAYS_PER_YEAR", "absolute_return", "cagr", "xirr"]
+__all__ = ["DAYS_PER_YEAR", "absolute_return", "cagr", "rolling_returns", "xirr"]
 
 DAYS_PER_YEAR: Final[int] = 365
 """Days in a year for annualising (actual/365: a leap day counts as an extra day)."""
@@ -116,9 +117,109 @@ def cagr(series: Iterable[PricePoint | tuple[dt.date, Decimal]]) -> Decimal:
             raise ValueError(
                 f"value on {first_date.isoformat()} (the earliest point) must be > 0"
             )
-        days = (last_date - first_date).days
-        years_inverse = Decimal(DAYS_PER_YEAR) / Decimal(days)
-        return (last_value / first_value) ** years_inverse - 1
+        return _annualise(first_date, first_value, last_date, last_value)
+
+
+def rolling_returns(
+    series: Iterable[PricePoint | tuple[dt.date, Decimal]], years: int
+) -> list[RollingReturn]:
+    """Return the CAGR over every ``years``-long window that ends on a series point.
+
+    For each point (the window end), the window start is the same calendar day
+    ``years`` earlier (29 February becomes 28 February). If the series has no point
+    on that day, the latest point before it is used. Points with no point on or
+    before that day get no row. The CAGR is computed like ``cagr()``: actual days
+    between the two points / 365.
+
+    Args:
+        series: Points as ``(date, value)`` tuples or objects with ``.date`` and
+            ``.value`` (``NavRecord``, ``EodPrice``, any ``PricePoint``), in any
+            order, any iterable. Dates must be unique; values must be >= 0.
+        years: Window length in whole years, >= 1.
+
+    Returns:
+        One ``RollingReturn`` per window, sorted by ``end`` (oldest first). An empty
+        list if no point has a full window (for example a series shorter than
+        ``years``, or an empty series).
+
+    Raises:
+        TypeError: If ``years`` is not an ``int`` (``bool`` included) or a value is
+            a ``float``.
+        ValueError: If ``years < 1``, two points share a date, a value is not finite
+            or is < 0, or a value used as a window start is 0.
+
+    Example:
+        >>> import datetime as dt
+        >>> from decimal import Decimal
+        >>> from indianfinance.returns import rolling_returns
+        >>> rows = rolling_returns(
+        ...     [
+        ...         (dt.date(2021, 1, 1), Decimal("100")),
+        ...         (dt.date(2022, 1, 1), Decimal("110")),
+        ...         (dt.date(2023, 1, 1), Decimal("121")),
+        ...     ],
+        ...     1,
+        ... )
+        >>> for r in rows:
+        ...     print(r.end, round(r.cagr, 4))
+        2022-01-01 0.1000
+        2023-01-01 0.1000
+    """
+    if isinstance(years, bool) or not isinstance(years, int):
+        raise TypeError(f"years must be an int, got {type(years).__name__}")
+    if years < 1:
+        raise ValueError(f"years must be >= 1, got {years}")
+    rows: list[RollingReturn] = []
+    with decimal.localcontext(_CONTEXT):
+        pts = _points(series)
+        dates = [d for d, _ in pts]
+        for end, end_value in pts:
+            target = _years_before(end, years)
+            if target is None:
+                continue
+            j = bisect.bisect_right(dates, target) - 1
+            if j < 0:
+                continue
+            start, start_value = pts[j]
+            if start_value == 0:
+                raise ValueError(
+                    f"value on {start.isoformat()} must be > 0 to start a window"
+                )
+            rows.append(
+                RollingReturn(
+                    start=start,
+                    end=end,
+                    start_value=start_value,
+                    end_value=end_value,
+                    cagr=_annualise(start, start_value, end, end_value),
+                )
+            )
+    return rows
+
+
+def _annualise(
+    start: dt.date, start_value: Decimal, end: dt.date, end_value: Decimal
+) -> Decimal:
+    """Return ``(end_value / start_value) ** (365 / days) - 1``.
+
+    Caller runs it inside ``decimal.localcontext(_CONTEXT)``, with ``start < end``
+    and ``start_value > 0``. ``cagr`` and ``rolling_returns`` share it.
+    """
+    years_inverse = Decimal(DAYS_PER_YEAR) / Decimal((end - start).days)
+    return (end_value / start_value) ** years_inverse - 1
+
+
+def _years_before(day: dt.date, years: int) -> dt.date | None:
+    """Return the same calendar day ``years`` earlier; 29 Feb -> 28 Feb.
+
+    ``None`` if that year is before ``datetime.MINYEAR``.
+    """
+    year = day.year - years
+    if year < dt.MINYEAR:
+        return None
+    if day.month == 2 and day.day == 29:
+        return dt.date(year, 2, 28)
+    return dt.date(year, day.month, day.day)
 
 
 def xirr(cashflows: Iterable[Cashflow], *, guess: float = 0.1) -> float:

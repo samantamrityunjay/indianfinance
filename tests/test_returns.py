@@ -158,7 +158,8 @@ def test_returns_reject_bad_arguments(
 
 
 def test_returns_public_names() -> None:  # AC6
-    assert returns.__all__ == ["DAYS_PER_YEAR", "absolute_return", "cagr", "xirr"]
+    names = "DAYS_PER_YEAR absolute_return cagr rolling_returns xirr"
+    assert returns.__all__ == names.split()
     assert returns.DAYS_PER_YEAR == 365
     assert indianfinance.__all__ == ["__version__"]
 

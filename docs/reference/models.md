@@ -10,6 +10,7 @@ are `Decimal`, and dates are `datetime.date`. Create `Decimal` values from strin
 | `Scheme` | One AMFI scheme with its fund house and category | `amfi.schemes()` |
 | `EodPrice` | One end-of-day price row from the NSE bhavcopy | `nse.bhavcopy()`, `nse.bhavcopy_range()` |
 | `Cashflow` | One dated amount | input to `returns.xirr()` |
+| `RollingReturn` | The CAGR over one rolling window | `returns.rolling_returns()` |
 
 Three models have a field named `date`. Use `import datetime as dt` and write
 `dt.date(...)`.
