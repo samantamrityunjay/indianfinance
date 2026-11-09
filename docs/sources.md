@@ -59,6 +59,19 @@ Quirks:
 - NAV can be `0`, `0.0` or `0.00` (241 rows, for example segregated portfolios), and
   can have up to 7 decimals. No `N.A.` or empty NAV was seen.
 
+How the library reads it (`amfi.latest_navs()` and `amfi.schemes()`):
+
+- Line 1 must be the header above, or `SourceFormatError` (line 1). Only lines with `;`
+  are rows; they need 8 fields.
+- A category line sets `scheme_type` and `category`, and resets the AMC. Any other line
+  without `;` is the AMC line. A row before both raises `SourceFormatError`.
+- An ISIN that is `-`, empty, `Redeemed` or not shaped like an ISIN becomes `None`.
+  Trailing spaces are stripped.
+- A NAV of `0` is kept as `Decimal("0")`. A NAV of `N.A.`, `-` or empty skips the row in
+  `latest_navs()`; `schemes()` keeps it.
+- A bad row (wrong field count, scheme code, NAV or date) raises `SourceFormatError`
+  with its line number. A reply that is not `text/plain` raises `SourceUnavailable`.
+
 ## AMFI: NAV history
 
 - URL: `https://portal.amfiindia.com/DownloadNAVHistoryReport_Po.aspx`

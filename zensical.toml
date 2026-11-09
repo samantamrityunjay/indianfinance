@@ -17,6 +17,8 @@ nav = [
   { "Install" = "install.md" },
   { "Data sources" = "sources.md" },
   { "How-to guides" = [
+    { "Latest NAVs" = "how-to/latest-navs.md" },
+    { "Find a scheme" = "how-to/find-a-scheme.md" },
     { "Absolute return and CAGR" = "how-to/absolute-return-and-cagr.md" },
     { "XIRR for a SIP" = "how-to/xirr-for-a-sip.md" },
     { "Rolling returns" = "how-to/rolling-returns.md" },
@@ -24,6 +26,7 @@ nav = [
   ] },
   { "API reference" = [
     { "Overview" = "reference/index.md" },
+    { "AMFI" = "reference/amfi.md" },
     { "Exceptions" = "reference/exceptions.md" },
     { "FD" = "reference/fd.md" },
     { "Models" = "reference/models.md" },

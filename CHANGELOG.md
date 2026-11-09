@@ -74,6 +74,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   publish time, Muhurat trading).
 - Added a trimmed real NSE bhavcopy as a test fixture, and a live test that detects
   changes to the bhavcopy header (`pytest -m live`).
+- Added `indianfinance.amfi.latest_navs()` and `indianfinance.amfi.schemes()`: the
+  latest NAV of every mutual fund scheme, and every scheme with its ISINs, AMC, scheme
+  type and category, from AMFI's `NAVAll.txt`. Each NAV keeps its own date. ISINs that
+  are `-`, `Redeemed` or not an ISIN become `None`; missing NAVs are skipped; a NAV of
+  `0` is kept. A changed file format raises `SourceFormatError` with the line number.
+- Added docs: "AMFI" API reference page and the how-to guides "Latest NAVs" and "Find
+  a scheme".
 
 ### Changed
 
