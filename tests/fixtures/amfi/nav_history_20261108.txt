@@ -1,0 +1,18 @@
+Scheme Code;NAV Name;Plan;Option;ISIN Div Payout/ISIN Growth;ISIN Div Reinvestment;Net Asset Value;Date
+
+Open Ended Schemes ( Debt Scheme - Overnight Fund )
+
+
+Aditya Birla Sun Life Mutual Fund
+145488;ADITYA BIRLA SUN LIFE OVERNIGHT FUND-  Direct - Monthly Payout of IDCW;Direct Plan;Monthly IDCW;INF209KB1ZL4;;1001.4034;08-Nov-2026
+145489;ADITYA BIRLA SUN LIFE OVERNIGHT FUND-  Direct - Weekly Reinvestment of IDCW;Direct Plan;Weekly IDCW;;INF209KB1ZJ8;1000.3243;08-Nov-2026
+145482;ADITYA BIRLA SUN LIFE OVERNIGHT FUND-  Regular - Weekly Reinvestment of IDCW option;Regular Plan;Weekly IDCW;;INF209KB1ZE9;1000.3182;08-Nov-2026
+145487;ADITYA BIRLA SUN LIFE OVERNIGHT FUND- Direct - Daily Reinvestment of IDCW;Direct Plan;Daily IDCW;;INF209KB1ZI0;1000.0200;08-Nov-2026
+145483;ADITYA BIRLA SUN LIFE OVERNIGHT FUND- Regular - Daily Reinvestment of IDCW;Regular Plan;Daily IDCW;;INF209KB1ZD1;1000.0200;08-Nov-2026
+145485;ADITYA BIRLA SUN LIFE OVERNIGHT FUND- Regular- Monthly Payout of IDCW option;Regular Plan;Monthly IDCW;INF209KB1ZG4;;1001.3682;08-Nov-2026
+145486;ADITYA BIRLA SUN LIFE OVERNIGHT FUND-DIRECT PLAN-GROWTH;Direct Plan;GROWTH;INF209KB1ZH2;;1502.8108;08-Nov-2026
+145481;ADITYA BIRLA SUNLIFE OVERNIGHT FUND-REGULAR PLAN-GROWTH;Regular Plan;GROWTH;INF209KB1ZC3;;1489.0834;08-Nov-2026
+
+Bajaj Finserv Mutual Fund
+153437;Bajaj Finserv Overnight Fund - Direct - Unclaimed less than 3 years IDCW Plan;Direct Plan;Unclaimed less than 3 years IDCW Plan;INF0QA701AE3;;1084.0517;08-Nov-2026
+153438;Bajaj Finserv Overnight Fund - Direct - Unclaimed less than 3 years Redemption Plan;Direct Plan;Unclaimed less than 3 years Redemption Plan;INF0QA701AF0;;1089.9554;08-Nov-2026

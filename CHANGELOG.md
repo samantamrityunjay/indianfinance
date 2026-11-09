@@ -63,6 +63,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   simple interest at actual / 365. `cumulative=False` gives principal plus interest
   paid out. TDS is ignored.
 - Added docs: "FD" API reference page and the how-to guide "FD value".
+- Added docs: "Data sources" page with the exact AMFI URLs, columns and quirks (NAVAll
+  and NAV history, 90-day limit), and "Data timing" page (when AMFI publishes NAVs and
+  what "latest" means).
+- Added trimmed real AMFI files as test fixtures, and live tests that detect changes to
+  the AMFI file headers (`pytest -m live`).
 
 ### Changed
 

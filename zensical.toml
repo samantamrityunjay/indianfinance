@@ -15,6 +15,7 @@ watch = ["CHANGELOG.md", "src/indianfinance"]
 nav = [
   { "Home" = "index.md" },
   { "Install" = "install.md" },
+  { "Data sources" = "sources.md" },
   { "How-to guides" = [
     { "Absolute return and CAGR" = "how-to/absolute-return-and-cagr.md" },
     { "XIRR for a SIP" = "how-to/xirr-for-a-sip.md" },
@@ -30,6 +31,7 @@ nav = [
   ] },
   { "Explanation" = [
     { "Design" = "explanation/design.md" },
+    { "Data timing" = "explanation/data-timing.md" },
   ] },
   { "Changelog" = "changelog.md" },
 ]

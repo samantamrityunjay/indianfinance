@@ -1,0 +1,95 @@
+Scheme Code;ISIN Div Payout/ ISIN Growth;ISIN Div Reinvestment;Scheme Name;Plan;Option;Net Asset Value;Date
+ 
+Open Ended Schemes(Children’s Fund - Childrens' Fund)
+ 
+Axis Mutual Fund
+ 
+135762;INF846K01WO1;-;Axis Children's Fund;Direct Plan;Growth Option;30.7694;06-Nov-2026
+135765;INF846K01WP8;-;Axis Children's Fund;Direct Plan;IDCW Option;28.3442;06-Nov-2026
+135759;INF846K01WJ1;-;Axis Children's Fund;Regular Plan;Growth Option;26.7614;06-Nov-2026
+135760;INF846K01WK9;-;Axis Children's Fund;Regular Plan;IDCW Option;24.6895;06-Nov-2026
+135764;INF846K01WR4;-;Axis Children's Fund;Direct Plan;Growth Option;31.3579;06-Nov-2026
+135763;INF846K01WS2;INF846K01WQ6;Axis Children's Fund;Direct Plan;IDCW Option;28.3978;06-Nov-2026
+135766;INF846K01WM5;-;Axis Children's Fund;Regular Plan;Growth Option;26.7581;06-Nov-2026
+135761;INF846K01WN3;INF846K01WL7;Axis Children's Fund;Regular Plan;IDCW Option;24.6672;06-Nov-2026
+ 
+Open Ended Schemes(Debt Scheme - Banking and PSU Fund)
+ 
+ 
+Kotak Mahindra Mutual Fund
+ 
+123689;INF174K01KI5;INF174K01KJ3;Kotak Banking and PSU Debt Fund;Direct Plan;Annual Dividend;17.1427;15-Sep-2017
+ 
+Open Ended Schemes(Debt Scheme - Corporate Bond Fund)
+ 
+ 
+Nippon India Mutual Fund
+ 
+109472;-;INF204K01EG7;Nippon India Corporate Bond Fund;Regular Plan;DAILY IDCW Option;17.0927;06-Nov-2026
+118808;-;INF204K01C23;Nippon India Corporate Bond Fund;Direct Plan;DAILY IDCW Option;17.0929;06-Nov-2026
+ 
+Open Ended Schemes(Debt Scheme - Credit Risk Fund)
+ 
+ 
+Franklin Templeton Mutual Fund
+ 
+148304;INF090I01VZ8;-;Franklin India Credit Risk Fund (No. of segregated portfolios-3);Direct Plan;Growth;0.0000;06-Nov-2026
+148303;INF090I01VX3;-;Franklin India Credit Risk Fund (No. of segregated portfolios-3);Regular Plan;Growth;0.0000;06-Nov-2026
+ 
+UTI Mutual Fund
+ 
+148239;INF789F1ARG8;INF789F1ARH6;UTI - Credit Risk Fund (Segregated - 06032020);;;0;06-Nov-2026
+148241;INF789F1ARK0;INF789F1ARL8;UTI - Credit Risk Fund (Segregated - 06032020);;;0;06-Nov-2026
+148242;INF789F1ARF0;-;UTI - Credit Risk Fund (Segregated - 06032020);;;0;06-Nov-2026
+ 
+Open Ended Schemes(Debt Scheme - Liquid Fund)
+ 
+Bajaj Finserv Mutual Fund
+ 
+151835;-;INF0QA701029;Bajaj Finserv Liquid Fund;Direct Plan;Daily - IDCW;1034.6939;08-Nov-2026
+151838;INF0QA701078;INF0QA701045;Bajaj Finserv Liquid Fund;Direct Plan;Fortnightly - IDCW;1036.0832;08-Nov-2026
+151833;INF0QA701011;-;Bajaj Finserv Liquid Fund;Direct Plan;Growth;1251.5290;08-Nov-2026
+151836;INF0QA701086;INF0QA701052;Bajaj Finserv Liquid Fund;Direct Plan;Monthly - IDCW;1038.8796;08-Nov-2026
+ 
+Bandhan Mutual Fund
+ 
+108694;INF194K01VP5;INF194K01VO8;BANDHAN LIQUID Fund;;;0;02-Oct-2008
+ 
+Open Ended Schemes(Income/Debt Oriented Schemes - Corporate Bond Fund)
+ 
+ 
+Kotak Mahindra Mutual Fund
+ 
+133786;-;INF178L01BT0 ;Kotak Corporate Bond Fund;;;1202.9939;21-Oct-2016
+ 
+Open Ended Schemes(Other Scheme - Index Funds)
+ 
+ 
+HDFC Mutual Fund
+ 
+152713;INF179KC1IM3;HDFCNIVODG;HDFC NIFTY100 Low Volatility 30 Index Fund;Direct Plan;Growth Option;10.5072;06-Nov-2026
+ 
+Interval Fund Schemes(Income)
+ 
+Kotak Mahindra Mutual Fund
+ 
+146839;-;INF174KA1DD0;Kotak Monthly Interval Plan Series 4;;;10.0087785;17-Apr-2019
+146837;INF174KA1DB4;-;Kotak Monthly Interval Plan Series 4;;;0.0001;22-Apr-2019
+ 
+Close Ended Schemes(ELSS)
+ 
+Bank of India Mutual Fund
+ 
+141950;INF761K01DS3;-;BANK OF INDIA MID CAP TAX FUND SERIES 1;Direct Plan;Growth;31.01;06-Nov-2026
+141949;INF761K01DT1;-;BANK OF INDIA MID CAP TAX FUND SERIES 1;Direct Plan;IDCW;31.01;06-Nov-2026
+ 
+Close Ended Schemes(Income)
+ 
+ 
+ICICI Prudential Mutual Fund
+ 
+127233;INF109KA16W1;-;ICICI Prudential Fixed Maturity Plan-Series 72-367 Days Plan R;;;13.0787;15-Jun-2017
+ 
+IL&FS Mutual Fund (IDF)
+ 
+130565;INF613Q01025;Redeemed;IL&FS Infrastructure Debt Fund Series 1A;;;1680494.0463;31-Dec-2018

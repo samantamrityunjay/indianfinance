@@ -1,0 +1,35 @@
+Scheme Code;NAV Name;Plan;Option;ISIN Div Payout/ISIN Growth;ISIN Div Reinvestment;Net Asset Value;Date
+
+Open Ended Schemes ( Equity Scheme - Multi Cap Fund )
+
+
+Aditya Birla Sun Life Mutual Fund
+148921;Aditya Birla Sun Life Multi-Cap Fund-Direct Growth;Direct Plan;GROWTH;INF209KB1Y49;;22.77;05-Nov-2026
+148921;Aditya Birla Sun Life Multi-Cap Fund-Direct Growth;Direct Plan;GROWTH;INF209KB1Y49;;22.83;06-Nov-2026
+148920;Aditya Birla Sun Life Multi-Cap Fund-Direct IDCW Payout;Direct Plan;IDCW Payout;INF209KB1Y56;;18.73;05-Nov-2026
+148920;Aditya Birla Sun Life Multi-Cap Fund-Direct IDCW Payout;Direct Plan;IDCW Payout;INF209KB1Y56;;18.79;06-Nov-2026
+148918;Aditya Birla Sun Life Multi-Cap Fund-Regular Growth;Regular Plan;GROWTH;INF209KB1Y23;;21.17;05-Nov-2026
+148918;Aditya Birla Sun Life Multi-Cap Fund-Regular Growth;Regular Plan;GROWTH;INF209KB1Y23;;21.22;06-Nov-2026
+
+Tata Mutual Fund
+151233;Tata Multicap Fund - Direct Plan - IDCW Reinvestment;Direct Plan;IDCW Reinvestment Option;;INF277KA1687;15.9760;05-Nov-2026
+151233;Tata Multicap Fund - Direct Plan - IDCW Reinvestment;Direct Plan;IDCW Reinvestment Option;;INF277KA1687;16.1492;06-Nov-2026
+151236;Tata Multicap Fund - Regular Plan - IDCW Reinvestment;Regular Plan;IDCW Reinvestment Option;;INF277KA1711;15.0837;05-Nov-2026
+151236;Tata Multicap Fund - Regular Plan - IDCW Reinvestment;Regular Plan;IDCW Reinvestment Option;;INF277KA1711;15.2466;06-Nov-2026
+
+Open Ended Schemes ( Debt Scheme - Liquid Fund )
+
+
+Bajaj Finserv Mutual Fund
+151835;Bajaj Finserv Liquid Fund - Direct Plan - Daily - IDCW;Direct Plan;Daily - IDCW;;INF0QA701029;1034.6939;05-Nov-2026
+151835;Bajaj Finserv Liquid Fund - Direct Plan - Daily - IDCW;Direct Plan;Daily - IDCW;;INF0QA701029;1034.6939;06-Nov-2026
+151838;Bajaj Finserv Liquid Fund - Direct Plan - Fortnightly - IDCW;Direct Plan;Fortnightly - IDCW;INF0QA701078;INF0QA701045;1035.4707;05-Nov-2026
+151838;Bajaj Finserv Liquid Fund - Direct Plan - Fortnightly - IDCW;Direct Plan;Fortnightly - IDCW;INF0QA701078;INF0QA701045;1035.7076;06-Nov-2026
+
+Open Ended Schemes ( Debt Scheme - Ultra Short Duration Fund )
+
+
+
+ICICI Prudential Mutual Fund
+145399;ICICI Prudential Ultra Short Term Fund - Daily IDCW;Regular Plan;Daily IDCW;-;INF109KC1ND7;10.0697;05-Nov-2026
+145399;ICICI Prudential Ultra Short Term Fund - Daily IDCW;Regular Plan;Daily IDCW;-;INF109KC1ND7;10.0697;06-Nov-2026
