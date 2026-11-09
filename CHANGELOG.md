@@ -57,6 +57,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the window.
 - Added docs: `rolling_returns()` on the "Returns" page, `RollingReturn` on the
   "Models" page, and the how-to guide "Rolling returns".
+- Added `indianfinance.fd.fd_value()`: the value of a fixed deposit on a date, rounded
+  to paise. Rate as a yearly fraction (`Decimal("0.07")` = 7 %); monthly, quarterly
+  (default), half-yearly or yearly compounding; days after the last whole period earn
+  simple interest at actual / 365. `cumulative=False` gives principal plus interest
+  paid out. TDS is ignored.
+- Added docs: "FD" API reference page and the how-to guide "FD value".
 
 ### Changed
 

@@ -19,10 +19,12 @@ nav = [
     { "Absolute return and CAGR" = "how-to/absolute-return-and-cagr.md" },
     { "XIRR for a SIP" = "how-to/xirr-for-a-sip.md" },
     { "Rolling returns" = "how-to/rolling-returns.md" },
+    { "FD value" = "how-to/fd-value.md" },
   ] },
   { "API reference" = [
     { "Overview" = "reference/index.md" },
     { "Exceptions" = "reference/exceptions.md" },
+    { "FD" = "reference/fd.md" },
     { "Models" = "reference/models.md" },
     { "Returns" = "reference/returns.md" },
   ] },

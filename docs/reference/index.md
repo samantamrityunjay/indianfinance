@@ -3,6 +3,7 @@
 Generated from the docstrings in the code. Module pages:
 
 - [Exceptions](exceptions.md)
+- [FD](fd.md)
 - [Models](models.md)
 - [Returns](returns.md)
 
