@@ -1,7 +1,8 @@
 # Quickstart
 
 [Install](install.md) the package, then get the latest NAV of a mutual fund from AMFI.
-These examples download AMFI's `NAVAll.txt` (about 1.5 MB), so they need the network.
+The first examples download AMFI's `NAVAll.txt` (about 1.5 MB); the last section
+downloads NAV history. All of them need the network.
 
 ## One fund's latest NAV
 
@@ -81,10 +82,50 @@ print((units * rec.nav).quantize(Decimal("0.01")))
 4326.32
 ```
 
+## Value a portfolio on a date
+
+`navs_as_of()` gives each fund's last NAV on or before a date, with the date of that NAV:
+
+<!-- docs-test: live -->
+```python
+import datetime as dt
+from decimal import Decimal
+
+from indianfinance.amfi import navs_as_of
+
+holdings = {"148921": Decimal("250"), "145486": Decimal("10.5")}
+navs = navs_as_of(dt.date(2026, 11, 8), codes=list(holdings))
+by_code = {rec.amfi_code: rec for rec in navs}
+total = Decimal(0)
+for code, units in holdings.items():
+    rec = by_code[code]
+    value = (units * rec.nav).quantize(Decimal("0.01"))
+    total += value
+    print(code, rec.date, rec.nav, value)
+print("Total", total)
+```
+
+Sample output:
+
+```text
+148921 2026-11-06 22.83 5707.50
+145486 2026-11-08 1502.8108 15779.51
+Total 21487.01
+```
+
+- 8 Nov 2026 is a Sunday. The equity fund (`148921`) has no NAV that day, so you get
+  Friday's. The overnight fund (`145486`) publishes every day, so you get Sunday's. Read
+  `rec.date`.
+- It is one whole-market NAV history request for the 7 days ending on the date. AMFI's
+  history is about 1.2 MB per day, so expect several MB (estimate; the wait for a short
+  request is not measured).
+- If you store ISINs instead of AMFI codes, pass them in `codes` and match the results
+  with `rec.isin` / `rec.isin_reinvestment`.
+
 ## Next steps
 
 - [Latest NAVs](how-to/latest-navs.md): selection rules, dates and errors.
 - [Find a scheme](how-to/find-a-scheme.md): search by AMC or category.
-- [NAV history](how-to/nav-history.md): NAVs for past dates.
+- [NAV history](how-to/nav-history.md): NAVs for past dates and the NAV on a date.
 - [XIRR for a SIP](how-to/xirr-for-a-sip.md): the return of a series of investments.
 - [Data timing](explanation/data-timing.md): why dates differ per scheme.

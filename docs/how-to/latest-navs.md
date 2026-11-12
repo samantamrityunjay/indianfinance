@@ -4,6 +4,8 @@
 `NAVAll.txt`, as a list of `NavRecord`. It downloads the whole file (about 1.5 MB) on
 every call, so it needs the network. For one fund, `latest_nav()` returns its record.
 
+For the NAV on a past date, see [NAV on a date](nav-history.md#nav-on-a-date).
+
 <!-- docs-test: live -->
 ```python
 from indianfinance.amfi import latest_nav, latest_navs

@@ -18,7 +18,12 @@ from typing import Final
 import httpx
 
 from indianfinance import _http
-from indianfinance._dates import chunk_range, format_amfi_date, parse_amfi_date
+from indianfinance._dates import (
+    MAX_HISTORY_DAYS,
+    chunk_range,
+    format_amfi_date,
+    parse_amfi_date,
+)
 from indianfinance.exceptions import (
     NoDataForDate,
     SourceFormatError,
@@ -27,7 +32,14 @@ from indianfinance.exceptions import (
 )
 from indianfinance.models import NavRecord, Scheme
 
-__all__ = ["HISTORY_TIMEOUT", "latest_nav", "latest_navs", "nav_history", "schemes"]
+__all__ = [
+    "HISTORY_TIMEOUT",
+    "latest_nav",
+    "latest_navs",
+    "nav_history",
+    "navs_as_of",
+    "schemes",
+]
 
 logger: Final = logging.getLogger(__name__)
 
@@ -309,6 +321,108 @@ def nav_history(
             f"no NAV for AMFI code {amfi_code} from {start} to {end}", symbol=amfi_code
         )
     return records
+
+
+def navs_as_of(
+    day: dt.date,
+    *,
+    codes: Iterable[str] | None = None,
+    name: str | None = None,
+    plan: str | None = None,
+    option: str | None = None,
+    lookback_days: int = 7,
+    client: httpx.Client | None = None,
+) -> list[NavRecord]:
+    """Return each scheme's last NAV on or before ``day``, with its real NAV date.
+
+    Use it to value a portfolio on a past date. Downloads AMFI's whole-market NAV
+    history once, for the ``lookback_days`` days ending on ``day`` (both ends
+    included; 7 days by default), and keeps, per scheme, the row with the latest date.
+    The record's ``date`` is that row's date, which is earlier than ``day`` when ``day``
+    is a weekend or holiday for that scheme. ``nav_history()`` is not changed and never
+    moves to another date.
+
+    A scheme with no NAV in the window is left out. Rows with a missing NAV are skipped,
+    so an earlier NAV in the window is used instead. A NAV of ``0`` is kept.
+
+    Select schemes with ``codes`` or ``name`` / ``plan`` / ``option``, as in
+    ``latest_navs()``. History names are AMFI's long "NAV Name" (name, plan and option,
+    for example ``Bajaj Finserv Liquid Fund - Direct Plan - Daily - IDCW``), and their
+    spelling can differ from ``NAVAll.txt``; prefer ``codes`` for a portfolio.
+
+    Args:
+        day: The valuation date. Not checked against today: AMFI decides.
+        codes: AMFI scheme codes and / or ISINs, exact, as in ``latest_navs()``. Every
+            one must have a NAV in the window. ``[]`` returns ``[]`` without a download.
+        name: Part of the history "NAV Name" (case-insensitive, spaces collapsed).
+        plan: Part of the plan, for example ``"Direct"``.
+        option: Part of the option, for example ``"Growth"``.
+        lookback_days: Days in the window, ``day`` included, 1 to 90. One request
+            always (AMFI serves at most 90 days at a time).
+        client: Your own ``httpx.Client``. Used as is (also its timeout) and not
+            closed. ``None`` creates a client with ``HISTORY_TIMEOUT``.
+
+    Returns:
+        One record per scheme, the latest one dated on or before ``day``, in the order
+        each scheme first appears in AMFI's file (not in ``codes`` order). ``[]`` if
+        ``name`` / ``plan`` / ``option`` match nothing.
+
+    Raises:
+        TypeError: If ``day`` is not a ``datetime.date`` (a ``datetime`` is refused),
+            ``lookback_days`` is not an ``int`` (``bool`` is refused), or ``codes`` is a
+            ``str`` or holds a non-``str``. Nothing is downloaded.
+        ValueError: If ``lookback_days`` is not 1 to 90, or the filter values are
+            wrong (as in ``latest_navs()``). Nothing is downloaded.
+        NoDataForDate: If AMFI has no NAVs in the whole window. ``.day`` is ``day``.
+        SymbolNotFound: If a code or ISIN has no NAV in the window. ``.symbol`` is the
+            first one missing, in your order; the message lists all of them.
+        SourceUnavailable: As in ``nav_history()``.
+        SourceFormatError: As in ``nav_history()``; also if AMFI sends a row dated after
+            ``day``.
+
+    Example:
+        >>> import datetime as dt
+        >>> from indianfinance.amfi import navs_as_of
+        >>> navs = navs_as_of(
+        ...     dt.date(2026, 11, 8), codes=["148921", "145486"]
+        ... )  # doctest: +SKIP
+    """
+    if isinstance(day, dt.datetime) or not isinstance(day, dt.date):
+        raise TypeError(f"day must be a datetime.date, got {type(day).__name__}")
+    if isinstance(lookback_days, bool) or not isinstance(lookback_days, int):
+        raise TypeError(
+            f"lookback_days must be an int, got {type(lookback_days).__name__}"
+        )
+    if not 1 <= lookback_days <= MAX_HISTORY_DAYS:
+        raise ValueError(
+            f"lookback_days must be 1 to {MAX_HISTORY_DAYS}, got {lookback_days}"
+        )
+    flt = _make_filter(codes, name, plan, option)
+    if flt.codes == ():
+        return []
+    start = day - dt.timedelta(days=lookback_days - 1)
+    with _http.open_client(client, timeout=HISTORY_TIMEOUT) as c:
+        text = _download_history(c, start, day)
+    if text is None:
+        raise NoDataForDate(f"AMFI has no NAVs from {start} to {day}", day=day)
+    records = _parse_history(text, first=start, last=day)
+    selected = _select(_last_per_scheme(records), flt)
+    _require_codes(selected, flt)
+    return selected
+
+
+def _last_per_scheme(records: Iterable[NavRecord]) -> list[NavRecord]:
+    """Return each scheme's record with the latest date. Pure.
+
+    Keyed by ``amfi_code``. On the same date the first row wins. Order: first
+    appearance of each code.
+    """
+    best: dict[str, NavRecord] = {}
+    for rec in records:
+        current = best.get(rec.amfi_code)
+        if current is None or rec.date > current.date:
+            best[rec.amfi_code] = rec
+    return list(best.values())
 
 
 def _download_history(

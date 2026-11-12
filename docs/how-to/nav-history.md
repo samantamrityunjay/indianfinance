@@ -55,6 +55,70 @@ Sample output:
 151835 2026-11-06 1034.6939
 ```
 
+## NAV on a date
+
+`navs_as_of(day)` returns each scheme's last NAV on or before `day`, as a list of
+`NavRecord`. Each record keeps its own `date`. It takes the same `codes=` / `name=` /
+`plan=` / `option=` selection as `latest_navs()`.
+
+<!-- docs-test: live -->
+```python
+from indianfinance.amfi import navs_as_of
+
+navs = navs_as_of(
+    dt.date(2026, 11, 8),
+    name="Aditya Birla Sun Life Overnight Fund",
+    plan="Direct",
+    option="Growth",
+)
+for rec in navs:
+    print(rec.amfi_code, rec.date, rec.nav)
+```
+
+Sample output:
+
+```text
+145486 2026-11-08 1502.8108
+```
+
+- The window is `lookback_days` days ending on `day` (default 7, 1 to 90). It is one
+  request. Size: AMFI's history is about 1.2 MB per day (T-015 measurement), so at most
+  about 8 MB for 7 days (estimate: about 1.2 MB per weekday from T-015; weekend days
+  have far fewer rows).
+- A scheme with no NAV in the window is left out. A requested code with none raises
+  `SymbolNotFound`: raise `lookback_days`.
+- Rows with a missing NAV are skipped, so an earlier NAV in the window is used.
+- Results are in AMFI's file order, not in `codes` order.
+- There is no "today" check. `nav_history()` itself never moves to another date.
+
+### Names in NAV history
+
+History names are AMFI's long "NAV Name", with plan and option inside, and their
+spelling is free. For example AMFI writes `ADITYA BIRLA SUNLIFE OVERNIGHT FUND-REGULAR
+PLAN-GROWTH` (no space in "SUNLIFE"), so this finds nothing:
+
+<!-- docs-test: live -->
+```python
+print(
+    len(
+        navs_as_of(
+            dt.date(2026, 11, 8),
+            name="Sun Life Overnight",
+            plan="Regular",
+            option="Growth",
+        )
+    )
+)
+```
+
+Sample output:
+
+```text
+0
+```
+
+Use `name=` to explore. For a portfolio, use `codes=`.
+
 ## Order
 
 Records come piece by piece. Inside a piece they are in AMFI's order: grouped by scheme,
@@ -74,8 +138,12 @@ you need another order. With `amfi_code`, the dates go up.
 ## Errors
 
 - `ValueError`: `start` is after `end`, or `amfi_code` is not digits. Nothing is sent.
-- `NoDataForDate`: AMFI has no NAVs in the whole range. `.day` is `start`.
-- `SymbolNotFound`: `amfi_code` has no NAV in the range.
+- `TypeError` / `ValueError` (`navs_as_of()`): `day` is not a `datetime.date`, or
+  `lookback_days` is not an `int` from 1 to 90. Nothing is sent.
+- `NoDataForDate`: AMFI has no NAVs in the whole range. `.day` is `start` (for
+  `navs_as_of()`, `day`).
+- `SymbolNotFound`: `amfi_code` has no NAV in the range. For `navs_as_of()`, a code or
+  ISIN in `codes` has no NAV in the window.
 - `SourceUnavailable`: the download failed after one retry, the reply was not
   `text/plain`, or AMFI redirected the request (the range is over its limit).
 - `SourceFormatError`: the file does not have the documented format. `.line` is the

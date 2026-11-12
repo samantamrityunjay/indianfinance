@@ -97,6 +97,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `ValueError` listing them.
 - Added docs: "Quickstart" page; fund selection in the "Latest NAVs" and "Find a scheme"
   guides.
+- Added `indianfinance.amfi.navs_as_of()`: each scheme's last NAV on or before a date,
+  from one NAV history request for the `lookback_days` days ending on it (default 7).
+  Records keep their real NAV date. Same `codes=` / `name=` / `plan=` / `option=`
+  selection as `latest_navs()`; a requested code without a NAV in the window raises
+  `SymbolNotFound`, a window without NAVs raises `NoDataForDate`.
+- Added docs: "Value a portfolio on a date" in the Quickstart and "NAV on a date" in the
+  "NAV history" guide.
 
 ### Changed
 

@@ -18,6 +18,9 @@ Mutual fund NAVs, schemes and NAV history from AMFI's whole-market files.
   option (case-insensitive parts); one whole-file download either way.
 - An unknown code or ISIN raises `SymbolNotFound`; `latest_nav()` with several matches
   raises `ValueError`.
+- `navs_as_of(day)` returns each scheme's last NAV on or before `day` from one NAV
+  history request (`lookback_days`, default 7); records keep their own date; same
+  selection as `latest_navs()`.
 - Guides: [Quickstart](../quickstart.md), [Latest NAVs](../how-to/latest-navs.md),
   [Find a scheme](../how-to/find-a-scheme.md), [NAV history](../how-to/nav-history.md)
   and [Use your own HTTP client](../how-to/custom-http-client.md).

@@ -129,7 +129,7 @@ Quirks:
 - Weekends return only schemes that publish NAVs every day: on Sunday 2026-11-08, 734
   rows (overnight, liquid and some ETFs).
 
-How the library reads it (`amfi.nav_history()`):
+How the library reads it (`amfi.nav_history()` and `amfi.navs_as_of()`):
 
 - Ranges are split into 90-day pieces, one request each, one after another.
 - Line 1 must be the history header, else `SourceFormatError`.
@@ -140,6 +140,7 @@ How the library reads it (`amfi.nav_history()`):
   `NoDataForDate`.
 - A redirect away from the history URL raises `SourceUnavailable`.
 - A row dated outside its piece raises `SourceFormatError`.
+- `navs_as_of()` sends one request of at most 90 days and keeps each scheme's latest row.
 
 ## NSE: CM bhavcopy
 

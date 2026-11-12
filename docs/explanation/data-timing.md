@@ -44,5 +44,7 @@ differs from row to row:
   have none.
 - AMFI serves at most 90 days per request. `nav_history()` splits longer ranges into
   90-day requests.
+- `navs_as_of(day)` returns the last NAV on or before `day`; for most schemes on a
+  weekend or holiday that is an earlier date.
 - A date with no NAVs yet gets a "No data found" page, not an empty file;
   `nav_history()` raises `NoDataForDate` if the whole range has none.
