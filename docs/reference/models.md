@@ -6,7 +6,7 @@ are `Decimal`, and dates are `datetime.date`. Create `Decimal` values from strin
 
 | Model | What it is | Will be returned by |
 |---|---|---|
-| `NavRecord` | One mutual fund NAV on one date | `amfi.latest_navs()`, `amfi.nav_history()` (coming in 0.1.0) |
+| `NavRecord` | One mutual fund NAV on one date | `amfi.latest_navs()`, `amfi.nav_history()` |
 | `Scheme` | One AMFI scheme with its fund house and category | `amfi.schemes()` |
 | `EodPrice` | One end-of-day price row from the NSE bhavcopy | `nse.bhavcopy()`, `nse.bhavcopy_range()` |
 | `Cashflow` | One dated amount | input to `returns.xirr()` |

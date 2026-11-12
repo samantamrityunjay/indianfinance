@@ -1,6 +1,6 @@
 # AMFI
 
-Mutual fund NAVs and schemes from AMFI's `NAVAll.txt`.
+Mutual fund NAVs, schemes and NAV history from AMFI's whole-market files.
 
 - Each call downloads the whole file (about 1.5 MB). There is no cache.
 - Every `NavRecord` has its own NAV date, as AMFI gives it. Dates differ per scheme; see
@@ -11,7 +11,11 @@ Mutual fund NAVs and schemes from AMFI's `NAVAll.txt`.
 - A download that fails, or a reply that is not `text/plain`, raises `SourceUnavailable`.
   A file that does not have the documented format raises `SourceFormatError` with the
   line number.
-- Guides: [Latest NAVs](../how-to/latest-navs.md) and
-  [Find a scheme](../how-to/find-a-scheme.md).
+- `nav_history()` splits ranges into 90-day requests, each about 73 MB and 2 to 2.5
+  minutes. The default client uses `HISTORY_TIMEOUT` (300 s read). A range with no NAVs
+  raises `NoDataForDate`; an unknown `amfi_code` raises `SymbolNotFound`.
+- Guides: [Latest NAVs](../how-to/latest-navs.md),
+  [Find a scheme](../how-to/find-a-scheme.md), [NAV history](../how-to/nav-history.md)
+  and [Use your own HTTP client](../how-to/custom-http-client.md).
 
 ::: indianfinance.amfi

@@ -1,11 +1,13 @@
 """AMFI mutual fund NAVs and schemes, from AMFI's whole-market files.
 
 Every function downloads a whole file (no cache). Each record carries the NAV date
-AMFI gives, never "today". See the Data sources page for the file formats.
+AMFI gives, never "today". NAV history is whole-market too, split into 90-day
+requests. See the Data sources page for the file formats.
 """
 
 from __future__ import annotations
 
+import datetime as dt
 import logging
 import re
 from decimal import Decimal
@@ -14,13 +16,35 @@ from typing import Final
 import httpx
 
 from indianfinance import _http
-from indianfinance._dates import parse_amfi_date
-from indianfinance.exceptions import SourceFormatError, SourceUnavailable
+from indianfinance._dates import chunk_range, format_amfi_date, parse_amfi_date
+from indianfinance.exceptions import (
+    NoDataForDate,
+    SourceFormatError,
+    SourceUnavailable,
+    SymbolNotFound,
+)
 from indianfinance.models import NavRecord, Scheme
 
-__all__ = ["latest_navs", "schemes"]
+__all__ = ["HISTORY_TIMEOUT", "latest_navs", "nav_history", "schemes"]
 
 logger: Final = logging.getLogger(__name__)
+
+HISTORY_TIMEOUT: Final[httpx.Timeout] = httpx.Timeout(10.0, read=300.0)
+"""Timeouts for NAV history: 10 s to connect, write and pool; 300 s to read.
+
+AMFI builds a 90-day report (about 73 MB) for 2 to 2.5 minutes before the first byte.
+Use it for your own client: ``httpx.Client(timeout=HISTORY_TIMEOUT)``.
+"""
+
+_HISTORY_URL: Final[str] = (
+    "https://portal.amfiindia.com/DownloadNAVHistoryReport_Po.aspx"
+)
+_HISTORY_HEADER: Final[str] = (
+    "Scheme Code;NAV Name;Plan;Option;ISIN Div Payout/ISIN Growth;"
+    "ISIN Div Reinvestment;Net Asset Value;Date"
+)
+_HISTORY_ATTEMPTS: Final[int] = 2
+_NO_DATA_TEXT: Final[str] = "no data found"
 
 _NAVALL_URL: Final[str] = "https://portal.amfiindia.com/spages/NAVAll.txt"
 _NAVALL_HEADER: Final[str] = (
@@ -97,6 +121,169 @@ def schemes(*, client: httpx.Client | None = None) -> list[Scheme]:
         >>> found = [s for s in schemes() if "Liquid" in s.category]  # doctest: +SKIP
     """
     return [scheme for scheme, _ in _parse_navall(_download(client))]
+
+
+def nav_history(
+    start: dt.date,
+    end: dt.date,
+    *,
+    amfi_code: str | None = None,
+    client: httpx.Client | None = None,
+) -> list[NavRecord]:
+    """Return every NAV AMFI has from ``start`` to ``end``, both days included.
+
+    Downloads AMFI's whole-market NAV history. Ranges longer than 90 days are split
+    into 90-day pieces, downloaded one after another. Each piece of 90 days is about
+    73 MB and AMFI needs 2 to 2.5 minutes before it starts sending, so a year takes
+    about 10 to 13 minutes (estimate from measured waits of 113-145 s per piece, not
+    counting download time). There is no cache.
+
+    Weekends and holidays have NAVs only for schemes that publish every day (liquid,
+    overnight, some ETFs). A piece with no NAVs at all is skipped. Rows with a missing
+    NAV are skipped; a NAV of ``0`` is kept.
+
+    Args:
+        start: First day, included.
+        end: Last day, included.
+        amfi_code: Keep only this scheme (AMFI scheme code, digits, for example
+            ``"148921"``). The whole market is still downloaded. ``None`` keeps all.
+        client: Your own ``httpx.Client``. Used as is (also its timeout) and not
+            closed. ``None`` creates a client with ``HISTORY_TIMEOUT``.
+
+    Returns:
+        One record per scheme per NAV date, piece after piece in date order; inside a
+        piece in AMFI's order (grouped by scheme, dates going up). With ``amfi_code``,
+        the dates go up.
+
+    Raises:
+        ValueError: If ``start > end`` or ``amfi_code`` is not ASCII digits. Nothing
+            is downloaded.
+        NoDataForDate: If AMFI has no NAVs in the whole range (for example dates not
+            published yet). ``.day`` is ``start``.
+        SymbolNotFound: If ``amfi_code`` has no NAV in the range. ``.symbol`` is the
+            code.
+        SourceUnavailable: If a download fails after retries, AMFI redirects the
+            request (range over its limit), or the reply is neither ``text/plain`` nor
+            the "No data found" page.
+        SourceFormatError: If a file does not have the documented format (wrong
+            header, no rows, a row without 8 fields, a bad code, NAV or date, or a date
+            outside the requested piece). ``.line`` is the 1-based line.
+
+    Example:
+        >>> import datetime as dt
+        >>> from indianfinance.amfi import nav_history
+        >>> navs = nav_history(
+        ...     dt.date(2026, 11, 5), dt.date(2026, 11, 6), amfi_code="148921"
+        ... )  # doctest: +SKIP
+    """
+    if start > end:
+        raise ValueError(f"start {start} is after end {end}")
+    if amfi_code is not None and _CODE_RE.fullmatch(amfi_code) is None:
+        raise ValueError(f"amfi_code must be digits, got {amfi_code!r}")
+    records: list[NavRecord] = []
+    seen_data = False
+    with _http.open_client(client, timeout=HISTORY_TIMEOUT) as c:
+        for first, last in chunk_range(start, end):
+            text = _download_history(c, first, last)
+            if text is None:
+                logger.info("NAV history %s..%s: no data", first, last)
+                continue
+            seen_data = True
+            records.extend(
+                _parse_history(text, first=first, last=last, amfi_code=amfi_code)
+            )
+    if not seen_data:
+        raise NoDataForDate(f"AMFI has no NAVs from {start} to {end}", day=start)
+    if amfi_code is not None and not records:
+        raise SymbolNotFound(
+            f"no NAV for AMFI code {amfi_code} from {start} to {end}", symbol=amfi_code
+        )
+    return records
+
+
+def _download_history(
+    client: httpx.Client, first: dt.date, last: dt.date
+) -> str | None:
+    """Download one piece (at most 90 days); return its text, or None for "no data".
+
+    Raises ``SourceUnavailable`` if AMFI redirects away from the history URL (a range
+    over its limit) or the reply is not ``text/plain``.
+    """
+    params = {"frmdt": format_amfi_date(first), "todt": format_amfi_date(last)}
+    response = _http.get(
+        client, _HISTORY_URL, params=params, max_attempts=_HISTORY_ATTEMPTS
+    )
+    final = response.request.url
+    wanted = httpx.URL(_HISTORY_URL)
+    if (final.host, final.path) != (wanted.host, wanted.path):
+        raise SourceUnavailable(
+            f"AMFI redirected the NAV history request to {final}; "
+            "the range may be over AMFI's limit",
+            url=str(wanted.copy_merge_params(params)),
+            status_code=response.status_code,
+        )
+    media_type = response.headers.get("Content-Type", "").split(";")[0].strip().lower()
+    if media_type == "text/html" and _NO_DATA_TEXT in response.text.casefold():
+        return None
+    return _decode_text(response)
+
+
+def _parse_history(
+    text: str, *, first: dt.date, last: dt.date, amfi_code: str | None = None
+) -> list[NavRecord]:
+    """Parse one NAV history file into records, in file order. Pure: no HTTP.
+
+    Rows with a missing NAV are skipped (one INFO log with the count). With
+    ``amfi_code``, other schemes' rows are skipped before their NAV, ISIN and date are
+    parsed.
+    """
+    lines = [raw.removesuffix("\r") for raw in text.split("\n")]
+    if lines[0].strip() != _HISTORY_HEADER:
+        raise SourceFormatError("unexpected NAV history header", line=1)
+    records: list[NavRecord] = []
+    rows = skipped = 0
+    for number, line in enumerate(lines[1:], start=2):
+        if ";" not in line:
+            continue
+        fields = [f.strip() for f in line.split(";")]
+        if len(fields) != _FIELDS:
+            raise SourceFormatError(
+                f"expected {_FIELDS} fields, got {len(fields)}", line=number
+            )
+        rows += 1
+        code, name, plan, option, isin, isin_re, nav_text, date_text = fields
+        if amfi_code is not None and code != amfi_code:
+            continue
+        if _CODE_RE.fullmatch(code) is None:
+            raise SourceFormatError(f"bad scheme code {code!r}", line=number)
+        if not name:
+            raise SourceFormatError("empty scheme name", line=number)
+        nav = _parse_nav(nav_text, line=number)
+        day = parse_amfi_date(date_text, line=number)
+        if not first <= day <= last:
+            raise SourceFormatError(f"date {day} outside {first}..{last}", line=number)
+        if nav is None:
+            skipped += 1
+            continue
+        records.append(
+            NavRecord(
+                amfi_code=code,
+                scheme_name=name,
+                plan=plan or None,
+                option=option or None,
+                isin=_parse_isin(isin),
+                isin_reinvestment=_parse_isin(isin_re),
+                date=day,
+                nav=nav,
+            )
+        )
+    if rows == 0:
+        raise SourceFormatError("NAV history has no rows", line=None)
+    if skipped:
+        logger.info(
+            "NAV history %s..%s: skipped %d rows with no NAV", first, last, skipped
+        )
+    return records
 
 
 def _download(client: httpx.Client | None = None) -> str:

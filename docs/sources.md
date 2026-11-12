@@ -129,6 +129,18 @@ Quirks:
 - Weekends return only schemes that publish NAVs every day: on Sunday 2026-11-08, 734
   rows (overnight, liquid and some ETFs).
 
+How the library reads it (`amfi.nav_history()`):
+
+- Ranges are split into 90-day pieces, one request each, one after another.
+- Line 1 must be the history header, else `SourceFormatError`.
+- Lines without `;` (blank, category and AMC lines) are skipped.
+- An empty, `-` or non-ISIN ISIN becomes `None`.
+- A `N.A.` (or `-`, empty) NAV skips the row; a NAV of `0` is kept.
+- The "No data found" page: the piece is skipped; if every piece has none,
+  `NoDataForDate`.
+- A redirect away from the history URL raises `SourceUnavailable`.
+- A row dated outside its piece raises `SourceFormatError`.
+
 ## NSE: CM bhavcopy
 
 The capital market (CM) bhavcopy is NSE's end-of-day file for every security traded on

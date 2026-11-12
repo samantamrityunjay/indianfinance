@@ -81,6 +81,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `0` is kept. A changed file format raises `SourceFormatError` with the line number.
 - Added docs: "AMFI" API reference page and the how-to guides "Latest NAVs" and "Find
   a scheme".
+- Added `indianfinance.amfi.nav_history()`: every NAV from AMFI's NAV history between
+  two dates (both included), optionally for one AMFI scheme code. Ranges over 90 days
+  are split into 90-day requests. A range with no NAVs raises `NoDataForDate`; an
+  unknown scheme code raises `SymbolNotFound`. History downloads use a 300 s read
+  timeout (`amfi.HISTORY_TIMEOUT`), because AMFI needs minutes to build a large report.
+- Added docs: how-to guides "NAV history" and "Use your own HTTP client" (timeouts,
+  proxies, retries, testing with `httpx.MockTransport`).
 
 ### Changed
 

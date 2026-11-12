@@ -42,6 +42,7 @@ differs from row to row:
 - History returns every NAV date in the range, one row per scheme per date.
 - Liquid and overnight funds and some ETFs also have NAVs on weekends. Other schemes
   have none.
-- AMFI serves at most 90 days per request. The library will split longer ranges into
-  several requests (M4).
-- A date with no NAVs yet gets a "No data found" page, not an empty file.
+- AMFI serves at most 90 days per request. `nav_history()` splits longer ranges into
+  90-day requests.
+- A date with no NAVs yet gets a "No data found" page, not an empty file;
+  `nav_history()` raises `NoDataForDate` if the whole range has none.

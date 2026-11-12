@@ -164,3 +164,12 @@ def test_get_logs_retries_at_info(caplog: pytest.LogCaptureFixture) -> None:  # 
     records = [r for r in caplog.records if r.levelno > logging.DEBUG]
     assert [r.levelno for r in records] == [logging.INFO] * 2
     assert "retry 1 of 3" in records[0].getMessage()
+
+
+def test_open_client_uses_timeout_only_for_own_client() -> None:  # T-018 AC11
+    with h.open_client(None, timeout=httpx.Timeout(1.0, read=99.0)) as own:
+        assert (own.timeout.read, own.timeout.connect) == (99.0, 1.0)
+    mine = httpx.Client(timeout=httpx.Timeout(7.0))
+    with h.open_client(mine, timeout=httpx.Timeout(1.0, read=99.0)) as c:
+        assert c is mine
+        assert c.timeout == httpx.Timeout(7.0)

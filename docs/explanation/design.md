@@ -74,11 +74,12 @@ Cashflow(date=datetime.date(2026, 1, 5), amount=Decimal('-6000'))
   (`amfiindia.com`, `www.amfiindia.com`, `portal.amfiindia.com`, `nseindia.com`,
   `www.nseindia.com`, `nsearchives.nseindia.com`, `npstrust.org.in`,
   `www.npstrust.org.in`). A redirect to any other host is refused.
-- Timeouts: 10 s to connect, 30 s to read.
+- Timeouts: 10 s to connect, 30 s to read; NAV history 300 s to read
+  (`amfi.HISTORY_TIMEOUT`).
 - Retries: timeouts, connection errors and HTTP 429, 500, 502, 503 and 504 are retried
   up to 3 times, after 1 s, 2 s and 4 s. A `Retry-After` header in whole seconds is
   honoured up to 30 s. A longer `Retry-After` stops retrying at once with
-  `SourceUnavailable`.
+  `SourceUnavailable`. NAV history: 1 retry.
 - Other errors, for example HTTP 403 and 404, fail at once.
 - A failure raises `SourceUnavailable` with `url` and `status_code`.
 - The `User-Agent` is `indianfinance/<version>`. NSE hosts get a browser-like one
@@ -94,6 +95,7 @@ Data functions (from M4 on) take `client: httpx.Client | None = None`.
   non-browser `User-Agent`, but this may change.
 - The library never closes your client.
 - Retries and the allowed-host check still apply.
+- More: [Use your own HTTP client](../how-to/custom-http-client.md).
 
 ```python
 import httpx

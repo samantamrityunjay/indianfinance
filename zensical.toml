@@ -19,10 +19,12 @@ nav = [
   { "How-to guides" = [
     { "Latest NAVs" = "how-to/latest-navs.md" },
     { "Find a scheme" = "how-to/find-a-scheme.md" },
+    { "NAV history" = "how-to/nav-history.md" },
     { "Absolute return and CAGR" = "how-to/absolute-return-and-cagr.md" },
     { "XIRR for a SIP" = "how-to/xirr-for-a-sip.md" },
     { "Rolling returns" = "how-to/rolling-returns.md" },
     { "FD value" = "how-to/fd-value.md" },
+    { "Use your own HTTP client" = "how-to/custom-http-client.md" },
   ] },
   { "API reference" = [
     { "Overview" = "reference/index.md" },

@@ -86,23 +86,26 @@ def make_client(*, timeout: httpx.Timeout = DEFAULT_TIMEOUT) -> httpx.Client:
 
 
 @contextlib.contextmanager
-def open_client(client: httpx.Client | None = None) -> Iterator[httpx.Client]:
+def open_client(
+    client: httpx.Client | None = None, *, timeout: httpx.Timeout = DEFAULT_TIMEOUT
+) -> Iterator[httpx.Client]:
     """Yield the caller's client, or a new one that is closed on exit.
 
     Public data functions use it as ``with open_client(client) as c: ...``.
 
     Args:
         client: The caller's client. Used as it is (its timeout, headers, proxies and
-            transport) and never closed here.
+            transport) and never closed here. ``timeout`` does not change it.
+        timeout: Timeouts for the client created when ``client`` is None.
 
     Yields:
-        ``client`` if given, else a client from ``make_client()``, closed when the
-        ``with`` block ends, also on error.
+        ``client`` if given, else a client from ``make_client(timeout=timeout)``, closed
+        when the ``with`` block ends, also on error.
     """
     if client is not None:
         yield client
         return
-    with make_client() as owned:
+    with make_client(timeout=timeout) as owned:
         yield owned
 
 
