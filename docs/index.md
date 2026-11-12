@@ -31,6 +31,7 @@ flowchart LR
 ## Next steps
 
 - [Install](install.md) the package.
+- Start with the [Quickstart](quickstart.md).
 - Browse the [API reference](reference/index.md).
 - Read the [design](explanation/design.md) behind the library.
 - See the [data sources](sources.md) and their quirks.

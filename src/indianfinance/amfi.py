@@ -10,6 +10,8 @@ from __future__ import annotations
 import datetime as dt
 import logging
 import re
+from collections.abc import Iterable, Sequence
+from dataclasses import dataclass
 from decimal import Decimal
 from typing import Final
 
@@ -25,7 +27,7 @@ from indianfinance.exceptions import (
 )
 from indianfinance.models import NavRecord, Scheme
 
-__all__ = ["HISTORY_TIMEOUT", "latest_navs", "nav_history", "schemes"]
+__all__ = ["HISTORY_TIMEOUT", "latest_nav", "latest_navs", "nav_history", "schemes"]
 
 logger: Final = logging.getLogger(__name__)
 
@@ -57,10 +59,18 @@ _CATEGORY_RE: Final = re.compile(r"(?P<type>[^()]*?Schemes)\s*\((?P<category>.*)
 _ISIN_RE: Final = re.compile(r"[A-Z]{2}[A-Z0-9]{9}[0-9]")
 _CODE_RE: Final = re.compile(r"[0-9]+")
 _NAV_RE: Final = re.compile(r"[0-9]+(?:\.[0-9]+)?")
+_MAX_CANDIDATES: Final[int] = 5
 
 
-def latest_navs(*, client: httpx.Client | None = None) -> list[NavRecord]:
-    """Return the latest NAV of every AMFI scheme, each with its own NAV date.
+def latest_navs(
+    *,
+    codes: Iterable[str] | None = None,
+    name: str | None = None,
+    plan: str | None = None,
+    option: str | None = None,
+    client: httpx.Client | None = None,
+) -> list[NavRecord]:
+    """Return the latest NAV of every AMFI scheme, or of the schemes you select.
 
     Downloads AMFI's ``NAVAll.txt`` (about 1.5 MB) once per call. The NAV date differs
     per record: most have the last business day, liquid and overnight funds can have a
@@ -70,14 +80,37 @@ def latest_navs(*, client: httpx.Client | None = None) -> list[NavRecord]:
     Rows whose NAV is missing (``N.A.``, ``-`` or empty) are skipped. A NAV of ``0``
     (for example a segregated portfolio) is returned as ``Decimal("0")``.
 
+    Select schemes with ``codes`` (AMFI codes and ISINs) or with ``name`` / ``plan`` /
+    ``option``. The whole file is still downloaded; the selection runs after it.
+    ``name``, ``plan`` and ``option`` match as case-insensitive substrings, with runs of
+    spaces counted as one space, and every given one must match. A row with an empty
+    plan or option never matches a ``plan`` / ``option`` filter.
+
     Args:
+        codes: AMFI scheme codes (digits, ``"135763"``) and / or ISINs
+            (``"INF846K01WS2"``, matched against both ISIN columns), exact, in any
+            order. Every one must have a NAV in the file. ``[]`` returns ``[]`` without
+            a download. Not a single ``str``: pass ``["135763"]``.
+        name: Part of the scheme name, for example ``"axis children's fund"``.
+        plan: Part of the plan, for example ``"Direct"``.
+        option: Part of the option, for example ``"Growth"``.
         client: Your own ``httpx.Client`` (timeout, proxies, headers). Used as is and
             not closed. ``None`` creates a short-lived client with the library defaults.
 
     Returns:
-        One record per scheme row, in file order.
+        The matching records in file order (not in ``codes`` order), each row once.
+        Without a filter, one record per scheme row. ``[]`` if ``name`` / ``plan`` /
+        ``option`` match nothing.
 
     Raises:
+        ValueError: If a code is neither digits nor ISIN-shaped, ``name`` / ``plan`` /
+            ``option`` is empty or only spaces, or ``codes`` is combined with ``name``
+            / ``plan`` / ``option``. Nothing is downloaded.
+        TypeError: If ``codes`` is a ``str`` or holds a non-``str``. Nothing is
+            downloaded.
+        SymbolNotFound: If a code or ISIN has no NAV in the file (unknown, or its NAV
+            is missing). ``.symbol`` is the first one missing, in your order; the
+            message lists all of them.
         SourceUnavailable: If the download fails after retries, or the reply is not
             ``text/plain`` (for example an HTML error page).
         SourceFormatError: If the file does not have the documented format: wrong
@@ -87,13 +120,90 @@ def latest_navs(*, client: httpx.Client | None = None) -> list[NavRecord]:
     Example:
         >>> from indianfinance.amfi import latest_navs
         >>> navs = latest_navs()  # doctest: +SKIP
+        >>> mine = latest_navs(codes=["135763", "INF0QA701011"])  # doctest: +SKIP
     """
-    parsed = _parse_navall(_download(client))
-    records = [rec for _, rec in parsed if rec is not None]
-    skipped = len(parsed) - len(records)
-    if skipped:
-        logger.info("NAVAll: skipped %d rows with no NAV", skipped)
-    return records
+    flt = _make_filter(codes, name, plan, option)
+    if flt.codes == ():
+        return []
+    records = _download_records(client)
+    selected = _select(records, flt)
+    _require_codes(selected, flt)
+    return selected
+
+
+def latest_nav(
+    code: str | None = None,
+    *,
+    name: str | None = None,
+    plan: str | None = None,
+    option: str | None = None,
+    client: httpx.Client | None = None,
+) -> NavRecord:
+    """Return the latest NAV of one fund, by AMFI code, ISIN, or name + plan + option.
+
+    Downloads ``NAVAll.txt`` once, like ``latest_navs()``. Give ``code`` (an AMFI code
+    or an ISIN), or ``name`` with optional ``plan`` / ``option`` (same matching rules as
+    ``latest_navs()``). Exactly one row must match. The record keeps its own NAV date.
+
+    Args:
+        code: AMFI scheme code or ISIN, exact.
+        name: Part of the scheme name (case-insensitive).
+        plan: Part of the plan, for example ``"Direct"``.
+        option: Part of the option, for example ``"Growth"``.
+        client: As in ``latest_navs()``.
+
+    Returns:
+        The one matching record.
+
+    Raises:
+        ValueError: If neither or both of ``code`` and ``name`` are given, ``code`` is
+            combined with ``plan`` / ``option``, a value is malformed (as in
+            ``latest_navs()``), or several rows match. The message lists up to 5
+            candidates (``<code> <name> (<plan>, <option>)``) and how many more.
+        TypeError: If ``code`` is not a ``str``.
+        SymbolNotFound: If nothing matches, or the row has no NAV. ``.symbol`` is
+            ``code``, or ``name`` as given.
+        SourceUnavailable: As in ``latest_navs()``.
+        SourceFormatError: As in ``latest_navs()``.
+
+    Example:
+        >>> from indianfinance.amfi import latest_nav
+        >>> rec = latest_nav("135763")  # doctest: +SKIP
+        >>> rec = latest_nav(
+        ...     name="Bajaj Finserv Liquid Fund", plan="Direct", option="Growth"
+        ... )  # doctest: +SKIP
+    """
+    if code is not None and not isinstance(code, str):
+        raise TypeError(f"code must be a str, got {type(code).__name__}")
+    if (code is None) == (name is None):
+        raise ValueError("give exactly one of code and name")
+    if code is not None and (plan is not None or option is not None):
+        raise ValueError("plan and option go with name, not with code")
+    flt = _make_filter([code] if code is not None else None, name, plan, option)
+    selected = _select(_download_records(client), flt)
+    if not selected:
+        raise SymbolNotFound(
+            f"no NAV for {(code or name)!r}",
+            symbol=code if code is not None else str(name),
+        )
+    if len(selected) > 1:
+        n = len(selected)
+        query = ", ".join(
+            f"{key}={value!r}"
+            for key, value in (
+                ("code", code),
+                ("name", name),
+                ("plan", plan),
+                ("option", option),
+            )
+            if value is not None
+        )
+        more = f" and {n - _MAX_CANDIDATES} more" if n > _MAX_CANDIDATES else ""
+        listed = ", ".join(_describe(r) for r in selected[:_MAX_CANDIDATES])
+        raise ValueError(
+            f"{n} schemes match {query}: {listed}{more}; pass an AMFI code or ISIN"
+        )
+    return selected[0]
 
 
 def schemes(*, client: httpx.Client | None = None) -> list[Scheme]:
@@ -283,6 +393,101 @@ def _parse_history(
         logger.info(
             "NAV history %s..%s: skipped %d rows with no NAV", first, last, skipped
         )
+    return records
+
+
+@dataclass(frozen=True, slots=True)
+class _Filter:
+    """A validated selection. ``None`` field = no condition."""
+
+    codes: tuple[str, ...] | None  # unique, caller order; AMFI codes and ISINs
+    name: str | None  # _norm()-ed
+    plan: str | None  # _norm()-ed
+    option: str | None  # _norm()-ed
+
+    def matches(self, rec: NavRecord) -> bool:
+        """Return True if ``rec`` meets every given condition."""
+        if self.codes is not None and not (
+            rec.amfi_code in self.codes
+            or rec.isin in self.codes
+            or rec.isin_reinvestment in self.codes
+        ):
+            return False
+        if self.name is not None and self.name not in _norm(rec.scheme_name):
+            return False
+        for wanted, have in ((self.plan, rec.plan), (self.option, rec.option)):
+            if wanted is not None and (have is None or wanted not in _norm(have)):
+                return False
+        return True
+
+
+def _norm(text: str) -> str:
+    """Collapse runs of whitespace to one space and case-fold."""
+    return " ".join(text.split()).casefold()
+
+
+def _make_filter(
+    codes: Iterable[str] | None,
+    name: str | None,
+    plan: str | None,
+    option: str | None,
+) -> _Filter:
+    """Validate the arguments and build the filter. No I/O.
+
+    Raises:
+        TypeError: If ``codes`` is a ``str`` or holds a non-``str``.
+        ValueError: If a code is not an AMFI code or ISIN, a text filter is empty, or
+            ``codes`` is combined with a text filter.
+    """
+    unique: tuple[str, ...] | None = None
+    if codes is not None:
+        if isinstance(codes, str):
+            raise TypeError("codes must be a list of codes, not a str; use codes=[...]")
+        items = list(codes)
+        for item in items:
+            if not isinstance(item, str):
+                raise TypeError(f"codes must hold str, got {type(item).__name__}")
+            if not (_CODE_RE.fullmatch(item) or _ISIN_RE.fullmatch(item)):
+                raise ValueError(f"not an AMFI code or ISIN: {item!r}")
+        unique = tuple(dict.fromkeys(items))
+        if name is not None or plan is not None or option is not None:
+            raise ValueError("codes cannot be combined with name, plan or option")
+    texts: list[str | None] = []
+    for label, value in (("name", name), ("plan", plan), ("option", option)):
+        if value is not None and _norm(value) == "":
+            raise ValueError(f"{label} must not be empty")
+        texts.append(None if value is None else _norm(value))
+    return _Filter(unique, texts[0], texts[1], texts[2])
+
+
+def _select(records: Iterable[NavRecord], flt: _Filter) -> list[NavRecord]:
+    """Return the records that match, in the order given."""
+    return [r for r in records if flt.matches(r)]
+
+
+def _require_codes(selected: Sequence[NavRecord], flt: _Filter) -> None:
+    """Raise ``SymbolNotFound`` if a code in ``flt.codes`` matched no record."""
+    if flt.codes is None:
+        return
+    found = {r.amfi_code for r in selected}
+    found.update(i for r in selected for i in (r.isin, r.isin_reinvestment) if i)
+    missing = [c for c in flt.codes if c not in found]
+    if missing:
+        raise SymbolNotFound(f"no NAV for {', '.join(missing)}", symbol=missing[0])
+
+
+def _describe(rec: NavRecord) -> str:
+    """Return ``<code> <name> (<plan>, <option>)`` for an error message."""
+    return f"{rec.amfi_code} {rec.scheme_name} ({rec.plan or '-'}, {rec.option or '-'})"
+
+
+def _download_records(client: httpx.Client | None) -> list[NavRecord]:
+    """Download ``NAVAll.txt`` and return the records that have a NAV."""
+    parsed = _parse_navall(_download(client))
+    records = [rec for _, rec in parsed if rec is not None]
+    skipped = len(parsed) - len(records)
+    if skipped:
+        logger.info("NAVAll: skipped %d rows with no NAV", skipped)
     return records
 
 

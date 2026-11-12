@@ -88,6 +88,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   timeout (`amfi.HISTORY_TIMEOUT`), because AMFI needs minutes to build a large report.
 - Added docs: how-to guides "NAV history" and "Use your own HTTP client" (timeouts,
   proxies, retries, testing with `httpx.MockTransport`).
+- Added fund selection to `indianfinance.amfi.latest_navs()`: `codes=` takes AMFI scheme
+  codes and ISINs (either ISIN column); `name=`, `plan=` and `option=` match
+  case-insensitive parts of the scheme name, plan and option. Still one whole-file
+  download. A code or ISIN without a NAV raises `SymbolNotFound`.
+- Added `indianfinance.amfi.latest_nav()`: the latest NAV of one fund by AMFI code,
+  ISIN, or name + plan + option. No match raises `SymbolNotFound`; several matches raise
+  `ValueError` listing them.
+- Added docs: "Quickstart" page; fund selection in the "Latest NAVs" and "Find a scheme"
+  guides.
 
 ### Changed
 

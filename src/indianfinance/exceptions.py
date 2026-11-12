@@ -117,10 +117,10 @@ class SourceUnavailable(IndianFinanceError):
 
 
 class SymbolNotFound(IndianFinanceError):
-    """The requested NSE symbol or AMFI scheme code is not in the source data.
+    """The requested NSE symbol, AMFI scheme code, ISIN or scheme name is not found.
 
     Attributes:
-        symbol: The NSE symbol or AMFI scheme code that was asked for.
+        symbol: The NSE symbol, AMFI scheme code, ISIN or scheme name asked for.
     """
 
     symbol: str
@@ -130,7 +130,7 @@ class SymbolNotFound(IndianFinanceError):
 
         Args:
             message: Human-readable text.
-            symbol: The NSE symbol or AMFI scheme code that was asked for.
+            symbol: The NSE symbol, AMFI scheme code, ISIN or scheme name asked for.
         """
         super().__init__(message)
         self.symbol = symbol

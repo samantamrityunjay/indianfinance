@@ -6,7 +6,7 @@ ISINs, AMC, scheme type and category. It downloads the whole `NAVAll.txt` file (
 
 One `Scheme` is one plan and option with its own AMFI code. A fund therefore has several
 codes (for example Direct and Regular, Growth and IDCW). The code is what you use to pick
-a record from `latest_navs()`.
+a record with `latest_nav()` or `latest_navs(codes=...)`.
 
 <!-- docs-test: live -->
 ```python
@@ -47,6 +47,27 @@ Sample output for the three queries in order, rows in file order (the scheme lis
 come from the category line, for example `Open Ended Schemes(Debt Scheme - Liquid Fund)`
 gives `"Open Ended Schemes"` and `"Debt Scheme - Liquid Fund"`. An ISIN that is `-` or not
 an ISIN is `None`.
+
+## Then get its NAV
+
+Pass the code you found to `latest_nav()`:
+
+<!-- docs-test: live -->
+```python
+from indianfinance.amfi import latest_nav
+
+rec = latest_nav("135763")
+print(rec.amfi_code, rec.date, rec.nav)
+```
+
+```text
+135763 2026-11-06 28.3978
+```
+
+If you need the NAV and not the AMC or category, `latest_navs(name=..., plan=...,
+option=...)` searches by name directly (see [Latest NAVs](latest-navs.md#pick-funds)).
+The same name, plan and option can match more than one code (Axis Children's Fund has two
+Direct Plan / Growth Option codes), so keep the AMFI code or ISIN of the fund you pick.
 
 Errors are the same as in [Latest NAVs](latest-navs.md#errors). See the
 [API reference](../reference/amfi.md).
