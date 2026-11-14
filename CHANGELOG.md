@@ -104,6 +104,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `SymbolNotFound`, a window without NAVs raises `NoDataForDate`.
 - Added docs: "Value a portfolio on a date" in the Quickstart and "NAV on a date" in the
   "NAV history" guide.
+- Added an internal parser for NSE's capital market bhavcopy (UDiFF zip): one
+  `EodPrice` per row, every series, prices as exact `Decimal`, close = NSE's official
+  close. A changed or broken file raises `SourceFormatError` with the line number. The
+  public `nse.eod_prices()` arrives later in 0.1.0.
 
 ### Changed
 
